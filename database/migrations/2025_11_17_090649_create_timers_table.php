@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('timers', function (Blueprint $table) {
             $table->id();
+            $table->timestamp('time');
+            $table->option();
             $table->timestamps();
         });
     }

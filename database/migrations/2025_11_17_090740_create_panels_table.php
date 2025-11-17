@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('panels', function (Blueprint $table) {
             $table->id();
+            $table->phrases();
+            $table->player_score();
+            $table->letter();
+            $table->state();
+            $table->timer();
             $table->timestamps();
         });
     }
