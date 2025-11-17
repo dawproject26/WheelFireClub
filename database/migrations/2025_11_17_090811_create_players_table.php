@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->name();
-            $table->player_score();
-            $table->option();
-            $table->letter();
+            $table->string('name');
+            $table->integer('fk_score');
+            $table->integer('fk_option');
+            $table->string('letter');
             $table->timestamps();
         });
     }

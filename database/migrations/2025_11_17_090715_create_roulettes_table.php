@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('roulettes', function (Blueprint $table) {
             $table->id();
-            $table->vocal();
-            $table->consonant();
-            $table->letter();
-            $table->demogorgon();
-            $table->demodog();
-            $table->vecna();
-            $table->eleven();
+            $table->integer('vocal');
+            $table->integer('consonant');
+            $table->integer('letter');
+            $table->integer('demogorgon');
+            $table->integer('demodog');
+            $table->integer('vecna');
+            $table->integer('eleven');
+            $table->integer('option');
             $table->timestamps();
         });
     }
