@@ -5,36 +5,52 @@ namespace App\Http\Controllers;
 use App\Models\Player;
 use App\Models\Score;
 use App\Models\Timer;
+use Illuminate\Http\Request;
 
 class PlayerController extends Controller
 {
-    public function init()
-    {
-        $player = Player::first();
-
-        if(!$player){
-            $player = Player::create(['name' => 'Jugador']);
-
-            Score::create([
-                'player_id' => $player->id,
-                'score' => 0
-            ]);
-
-            Timer::create([
-                'player_id' => $player->id,
-                'seconds' => 120
-            ]);
-        }
-        
-
-        return response()->json([
-            'player_id' => $player->id,
-            'seconds' => $player->timer->seconds,
-            'score' => $player->score->score
-        ]);
-    }
     public function welcome()
     {
         return view('welcome');
+    }
+
+    public function login(Request $request)
+    {
+        $player = Player::where('name', $request->name)->first();
+
+        if (!$player) {
+            return back()->with('error', 'Jugador no encontrado');
+        }
+
+        session(['player_id' => $player->id]);
+
+        return redirect()->route('wheelfireclub.panel');
+    }
+
+    public function register(Request $request)
+    {
+        $player = Player::create([
+            'name' => $request->name
+        ]);
+
+        Score::create([
+            'player_id' => $player->id,
+            'score' => 0
+        ]);
+
+        Timer::create([
+            'player_id' => $player->id,
+            'seconds' => 120
+        ]);
+
+        session(['player_id' => $player->id]);
+
+        return redirect()->route('wheelfireclub.panel');
+    }
+
+    public function logout()
+    {
+        session()->forget('player_id');
+        return redirect()->route('welcome');
     }
 }

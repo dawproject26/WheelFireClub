@@ -6,12 +6,13 @@ use Illuminate\Http\Request;
 
 class CheckPlayerSession
 {
-    public function handle(Request $request, Closure $next)
-    {
-        
-        if (!session()->has('player_id')) {
-            return redirect('/');
-        }
-        return $next($request);
+    public function handle($request, Closure $next)
+{
+    if (!session()->has('player_id')) {
+        return redirect()->route('/');
     }
+
+    return $next($request);
+}
+
 }

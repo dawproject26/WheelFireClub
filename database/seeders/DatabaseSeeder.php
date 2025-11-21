@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Database\Seeders\PanelSeeder;
 use Database\Seeders\RouletteSeeder;
 
+
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;

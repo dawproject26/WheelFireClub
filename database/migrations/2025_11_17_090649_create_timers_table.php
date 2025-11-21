@@ -12,7 +12,7 @@ public function up(): void
 {
     Schema::create('timers', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('players_id')->onDelete('cascade');
+    $table->foreignId('player_id')->nullable();
     $table->integer('seconds')->default(120);
     $table->timestamps();
     });
