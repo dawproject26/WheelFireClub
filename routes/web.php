@@ -1,10 +1,13 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\RouletteController;
+use App\Http\Controllers\ScoreController;
+use App\Http\Controllers\TimerController;
 
 Route::get('/', [PlayerController::class, 'welcome'])->name('welcome');
 Route::post('/register', [PlayerController::class, 'register'])->name('player.register');
@@ -13,21 +16,15 @@ Route::get('/logout', [PlayerController::class, 'logout'])->name('player.logout'
 
 Route::middleware(['player.session'])->group(function () {
 
-    Route::middleware(['player.session'])->group(function () {
-    
-    // Vista principal
     Route::get('/wheelfireclub/panel', [PanelController::class, 'index'])->name('wheelfireclub.panel');
-    
-    // Acción de girar ruleta
-    Route::get('/wheelfireclub/spin', [RouletteController::class, 'spin'])->name('wheelfireclub.spin');
-    
-    // Acción de comprobar letra
-    Route::post('/wheelfireclub/check', [PanelController::class, 'checkLetter'])->name('wheelfireclub.check');
-    
-    // Acción de guardar puntuación final
-    Route::post('/wheelfireclub/panel/store', [PanelController::class, 'store'])->name('wheelfireclub.adivina.store');
-});
-    
+
+    Route::post('/wheelfireclub/spin', [RouletteController::class, 'spin'])->name('wheelfireclub.spin');
+    Route::post('/wheelfireclub/roulette/apply', [RouletteController::class, 'apply'])->name('wheelfireclub.roulette.apply');
+
+    Route::post('/wheelfireclub/check', [ScoreController::class, 'letter'])->name('wheelfireclub.check');
+    Route::post('/wheelfireclub/guess', [ScoreController::class, 'guess'])->name('wheelfireclub.guess');
+
+    Route::get('/wheelfireclub/timer/{player_id}', [TimerController::class, 'get'])->name('wheelfireclub.timer');
 });
 
 Route::get('/dashboard', function () {

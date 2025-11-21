@@ -3,24 +3,26 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Roulette;
 
 class RouletteSeeder extends Seeder
 {
     public function run(): void
     {
         $options = [
-            'VOCAL', 'VOCAL',
-            'CONSONANTE', 'CONSONANTE',
-            'ELEVEN',
+            'VOCAL',
+            'VOCAL',
+            'CONSONANTE',
+            'CONSONANTE',
             'VECNA',
             'DEMOGORGON',
-            'DEMOPERRO'
+            'DEMOPERRO',
+            'ELEVEN'
         ];
 
-        foreach ($options as $option) {
-            DB::table('roulette')->insert([
-                'option' => $option
+        foreach ($options as $opt) {
+            Roulette::create([
+                'option' => $opt
             ]);
         }
     }

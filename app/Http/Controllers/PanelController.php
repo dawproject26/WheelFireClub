@@ -1,34 +1,20 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Player;
-use App\Models\Score;
-use Illuminate\Http\Request;
+use App\Models\Panel;
 
 class PanelController extends Controller
 {
- 
     public function index()
     {
-    
-        $playerId = session('player_id');
-        $player = Player::find($playerId);
+        // Panel ya viene desde los seeders de tu compañero
+        $panel = Panel::with('phrases')->inRandomOrder()->first();
 
-        return view('wheelfireclub.panel', ['player' => $player]);
-    }
+        if(!$panel){
+            abort(500, "No hay paneles en la base de datos.");
+        }
 
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'points' => 'required|integer'
-        ]);
-
-        Score::create([
-            'points'      => $request->points,
-            'player_id'   => session('player_id')
-        ]);
-
-        return response()->json(['status' => 'success']);
+        return view('game.index', compact('panel'));
     }
 }
