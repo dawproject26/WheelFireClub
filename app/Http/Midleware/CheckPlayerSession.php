@@ -8,7 +8,6 @@ class CheckPlayerSession
 {
     public function handle(Request $request, Closure $next)
     {
-        
         if (!session()->has('player_id')) {
             return redirect('/');
         }

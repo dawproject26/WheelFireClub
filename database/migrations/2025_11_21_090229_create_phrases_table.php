@@ -1,26 +1,30 @@
 <?php
 
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-
 return new class extends Migration
 {
-public function up(): void
-{
-    Schema::create('panel_phrases', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('panel_id')->constrained('panels')->onDelete('cascade');
-    $table->text('phrase'); // guardamos frase sin tildes, sin puntuacion
-    $table->timestamps();
-    });
-}
+    /**
+     * Run the migrations.
+     */
+    // database/migrations/xxxx_create_phrases_table.php
+    public function up()
+    {
+        Schema::create('phrases', function (Blueprint $table) {
+            $table->id();
+            $table->string('movie');
+            $table->text('phrase');
+            $table->timestamps();
+        });
+    }
 
-
-public function down(): void
-{
-Schema::dropIfExists('panel_phrases');
-}
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('phrases');
+    }
 };
