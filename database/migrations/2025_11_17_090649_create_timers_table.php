@@ -11,10 +11,10 @@ return new class extends Migration
 public function up(): void
 {
     Schema::create('timers', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('player_id')->nullable();
-    $table->integer('seconds')->default(120);
-    $table->timestamps();
+        $table->id();
+        $table->foreignId('player_id')->nullable();
+        $table->integer('seconds')->default(120);
+        $table->timestamps();
     });
 }
 
