@@ -133,7 +133,7 @@
     /* Elimina el posicionamiento del botón y lo aplica al formulario */
     position: absolute;
     top: 50%;
-    left: 60%;
+    left: 55%;
     transform: translate(-50%, -50%); /* Centra el formulario completo */
     display: flex; /* Coloca los elementos uno al lado del otro */
     align-items: center; /* Alineación vertical */
@@ -189,7 +189,7 @@
     box-shadow: 0 0 10px #e20000; /* Efecto neón suave */
     transition: box-shadow 0.3s ease; /* Transición para el brillo al pasar el ratón */
     top: 40%;
-    left: 35%;
+    left: 30%;
 }
 
 .avatar-selector:hover {
