@@ -15,9 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
+        $this->call([
+        PanelSeeder::class,  // Línea para llamar al seeder de Panel
+    ]);
+        User::factory()->create([   
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);

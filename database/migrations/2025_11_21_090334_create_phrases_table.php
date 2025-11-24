@@ -9,15 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    // database/migrations/xxxx_create_phrases_table.php
+    public function up()
     {
-        Schema::create('panels', function (Blueprint $table) {
+        Schema::create('phrases', function (Blueprint $table) {
             $table->id();
-            $table->text('phrases');
-            $table->integer('player_score')->default(0);
-            $table->string('letter', 1)->nullable();
-            $table->string('state')->default('active');
-            $table->integer('timer')->default(120);
+            $table->string('movie');
+            $table->text('phrase');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('panels');
+        Schema::dropIfExists('phrases');
     }
 };
