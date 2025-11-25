@@ -20,7 +20,7 @@
                     @foreach(str_split($palabra) as $letra)
                         <span class="letra oculta" data-letra="{{ strtoupper($letra) }}">
                             <div class="cara cara-frontal">
-                                <img src="{{ Vite::asset('resources/img/postit.png') }}" class="postit">
+                                <img src="{{ Vite::asset('/img/postit.png') }}" class="postit">
                             </div>
 
                             <div class="cara cara-trasera" aria-hidden="true">
