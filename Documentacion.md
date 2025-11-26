@@ -13,7 +13,7 @@ g
 - `App\Models\Player` - Modelo para los jugadores
 - `App\Models\Timer` - Modelo para gestionar temporizadores
 - `Illuminate\Http\Request` - Manejo de peticiones HTTP
-- `Illuminate\Support\Facades\Session` - Gestión de sesiones
+- `Illuminate\Support\Facades\Session` - Gestión de sesione
 
 ---
 
