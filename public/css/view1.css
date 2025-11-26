@@ -159,7 +159,7 @@
     border-radius: 10px;
 }
 
-#botonjugarg:hover {
+#botonjugar:hover {
     box-shadow: 0 0 20px #e20000; /* Más brillo al pasar el ratón */
 }
 
@@ -197,7 +197,7 @@
     box-shadow: 0 0 10px #e20000; /* Efecto neón suave */
     transition: box-shadow 0.3s ease; /* Transición para el brillo al pasar el ratón */
     top: 40%;
-    left: 30%;
+    left: 32.5%;
 }
 
 .avatar-selector:hover {
@@ -219,6 +219,3 @@
     object-fit: cover; /* Recorta la imagen si es necesario para que encaje */
     display: block; /* Elimina espacio extra debajo de las imágenes */
 }
-
-
-
