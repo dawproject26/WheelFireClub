@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('movie');
             $table->text('phrase');
-            $table->foreignId('panel_id')->constrained('panels')->onDelete('cascade');
+            $table->foreignId('panel_id')->constrained('panels')->onDelete('cascade')->nullable();
             $table->timestamps();
         });
     }

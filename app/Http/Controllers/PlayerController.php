@@ -11,11 +11,20 @@ class PlayerController extends Controller
 {
     public function welcome()
     {
-        return view('welcome'); // Asegúrate de que welcome.blade.php existe
+        // Si ya está logueado, redirigir al panel
+        if (session('player_id')) {
+            return redirect()->route('panel.index');
+        }
+        
+        return view('welcome');
     }
 
     public function login(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255'
+        ]);
+
         $player = Player::where('name', $request->name)->first();
 
         if (!$player) {
@@ -32,6 +41,10 @@ class PlayerController extends Controller
 
     public function register(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:players,name'
+        ]);
+
         $player = Player::create([
             'name' => $request->name
         ]);
@@ -43,7 +56,7 @@ class PlayerController extends Controller
 
         Timer::create([
             'player_id' => $player->id,
-            'seconds' => 120
+            'seconds' => 180
         ]);
 
         session([
@@ -57,6 +70,6 @@ class PlayerController extends Controller
     public function logout()
     {
         session()->forget(['player_id', 'player_name']);
-        return redirect()->route('welcome');
+        return redirect('/');
     }
 }

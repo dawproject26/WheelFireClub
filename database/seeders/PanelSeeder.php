@@ -6,12 +6,20 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use App\Models\Phrase;
+use App\Models\Panel;
+
 
 
 class PanelSeeder extends Seeder
 {
     public function run(): void
     {
+        $panel = Panel::first();
+        if (!$panel) {
+            $panel = Panel::create(['title' => 'Panel Principal']);
+        }
         $phrases = [
             // TUS FRASES ORIGINALES
             ['movie' => '300', 'phrase' => 'ESTO ES ESPARTA'],
@@ -114,6 +122,12 @@ class PanelSeeder extends Seeder
             ['movie' => 'EL SEÑOR DE LOS ANILLOS', 'phrase' => 'HASTA LA PERSONA MAS PEQUENA PUEDE CAMBIAR EL DESTINO'],
         ];
 
-        DB::table('phrases')->insert($phrases);
+         foreach ($phrases as $phraseData) {
+            Phrase::create([
+                'movie' => $phraseData['movie'],
+                'phrase' => $phraseData['phrase'],
+                'panel_id' => $panel->id,
+            ]);
+        }
     }
 }

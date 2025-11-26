@@ -3,413 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Juego - {{ $title }}</title>
+    <title>Wheel Fire Club - BOJACK HORSEMAN</title>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-
-    <!-- Contenedor del Abecedario -->
-    <div class="letter-sonia" id="alphabet-sidebar">
-        @php
-            $alphabet = [
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-            ];
-        @endphp
- 
-        @foreach ($alphabet as $letter)
-            @php
-                $baseFileName = strtolower($letter);
-                if ($letter === 'Y') {
-                    $baseFileName = 'igriega';
-                }
-            @endphp
- 
-            <div class="key-container" data-letter="{{ $letter }}">
-                <img id="img-{{ $letter }}"
-                 class="key-image"
-                 src="{{ asset('img/letras/' . $baseFileName . '.png') }}"
-                 alt="Letra {{ $letter }}"
-                 data-tached-src="{{ asset('img/letras_tachadas/' . $baseFileName . '_tachada.png') }}">
-            </div>
-        @endforeach
-    </div>
-
-    <div class="panel-tirsa">
-        <div class="cabecera">
-            <h1 class="titulo-panel">{{ $title }}</h1>
+    <div class="layout-container">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <h1 class="titulo-panel">BOJACK HORSEMAN</h1>
         </div>
 
-        <div class="panel-container">
-            @foreach(explode(' ', $phraseSeleccionada) as $indice => $palabra)
-            <span class="palabra">
-                @foreach(str_split($palabra) as $letra)
-                <span class="letra oculta" data-letra="{{ strtoupper($letra) }}">
-                    <img src="{{ asset('img/postit.png') }}" class="postit">
-                    <div class="letra-texto">{{ $letra }}</div>
-                </span>
+        <!-- PANEL DEL ABECEDARIO (IZQUIERDA) -->
+        <div class="alphabet-panel">
+            <div id="alphabet-sidebar">
+                @php
+                    $alphabet = range('A', 'Z');
+                @endphp
+     
+                @foreach ($alphabet as $letter)
+                    @php
+                        $baseFileName = strtolower($letter);
+                        if ($letter === 'Y') {
+                            $baseFileName = 'igriega';
+                        }
+                    @endphp
+                    <div class="key-container" data-letter="{{ $letter }}" onclick="seleccionarLetra('{{ $letter }}')">
+                        <img id="img-{{ $letter }}"
+                             class="key-image"
+                             src="{{ asset('img/letras/' . $baseFileName . '.png') }}"
+                             alt="Letra {{ $letter }}"
+                             data-tached-src="{{ asset('img/letras_tachadas/' . $baseFileName . '_tachada.png') }}"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'key-content\'>{{ $letter }}</div>'">
+                    </div>
                 @endforeach
-            </span>
-            @if($indice < count(explode(' ', $phraseSeleccionada)) - 1)
-            <span class="espacio">&nbsp;&nbsp;&nbsp;</span>
-            @endif
-            @endforeach
-        </div>
-    </div>
-
-<div class="david">
-    <h1 style="text-align:center; margin-top:16px;">WheelFireClub</h1>
-
-    <div class="contenedor-juego">
-        <div id="result-display" style="text-align:center; margin:10px;"></div>
-        
-        <div class="marco-ruleta">
-            <div id="flecha">⬆</div>
-            <div id="ruleta">
-                <img src="{{ asset('img/ruleta.png') }}" alt="rulete">
             </div>
         </div>
 
-        <div style="text-align:center; margin-top: 12px;">
-            <button id="btnGirar">GIRAR</button>
-            <a href="{{ route('panel.reset') }}"><button>Reiniciar Juego</button></a>
-        </div>  
+        <!-- TABLERO CENTRAL (POST-ITS) - ARRIBA -->
+        <div class="board-panel">
+            <div class="panel-container">
+                <div id="frase-container">
+                    <!-- Las letras se generarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
 
-        <p id="resultado" style="text-align:center; margin-top:10px; font-size:1.1rem;">...</p>
-        <p id="temporizador" style="text-align:center; font-weight:700; margin-top:6px;">Tiempo restante: 02:00</p>
+        <!-- RULETA - CENTRO -->
+        <div class="wheel-panel">
+            <div class="wheel-container">
+                <div class="marco-ruleta">
+                    <div id="flecha">⬆</div>
+                    <div id="ruleta">
+                        <img src="{{ asset('img/ruleta.png') }}" alt="ruleta">
+                    </div>
+                </div>
 
-        <div id="efecto-temporizador" class="efecto-temporizador"></div>
+                <div class="wheel-controls">
+                    <button id="btnGirar">GIRAR RULETA</button>
+                    <p id="resultado">...</p>
+                    <div id="efecto-temporizador" class="efecto-temporizador"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFORMACIÓN DEL JUGADOR (DERECHA - ARRIBA) -->
+        <div class="info-panel">
+            <div class="player-info-card">
+                <h3>Información del Jugador</h3>
+                <div class="player-info-item">
+                    <span class="player-info-label">Jugador:</span>
+                    <span class="player-info-value">Raut</span>
+                </div>
+                <div class="player-info-item">
+                    <span class="player-info-label">Puntaje:</span>
+                    <span class="player-info-value" id="puntos-actuales">0</span>
+                </div>
+                <div class="player-info-item">
+                    <span class="player-info-label">Tiempo:</span>
+                    <span class="player-info-value" id="temporizador">03:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTROLES (DERECHA - ABAJO) -->
+        <div class="controls-panel">
+            <button onclick="resetGame()" class="control-btn">🔄 Reiniciar Juego</button>
+            <button onclick="logout()" class="control-btn">🚪 Salir</button>
+            
+            <div class="guess-section">
+                <button id="btnAdivinar">🎯 Adivinar Frase Completa</button>
+            </div>
+        </div>
+
+        <!-- MODAL PARA ADIVINAR -->
+        <div id="guessModal" class="guess-modal">
+            <div class="guess-modal-content">
+                <h3>🔍 Adivinar la Frase Completa</h3>
+                <p style="color: #ff6b6b; margin: 10px 0;">
+                    ⚠️ ¿Estás seguro? Si fallas es GAME OVER y no podrás volver a jugar.
+                </p>
+                <input type="text" id="guessInput" class="guess-input" placeholder="Escribe la frase completa aquí...">
+                <div class="guess-buttons">
+                    <button onclick="confirmGuess()" class="guess-btn guess-confirm">✅ Confirmar</button>
+                    <button onclick="closeGuessModal()" class="guess-btn guess-cancel">❌ Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENSAJES DE RESULTADO -->
+        <div id="result-display"></div>
     </div>
-</div>
 
-<script>
-    // Configuración CSRF
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    });
+    <script>
+        // ===== VARIABLES GLOBALES =====
+        let tiempoRestante = 180; // 3 minutos
+        let temporizadorInterval;
+        let letrasUsadas = [];
+        let opcionRuletaActual = null;
+        let fraseActual = "BOJACK HORSEMAN";
+        let movieActual = "BOJACK HORSEMAN";
+        let puntuacion = 0;
+        let juegoActivo = true;
 
-    // Variables globales para control de letras
-    const vocales = ['A', 'E', 'I', 'O', 'U'];
-    const consonantes = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
-    let tipoSeleccionPermitido = null; // 'vocal', 'consonante', o null para todas
+        // ===== CONFIGURACIÓN RULETA =====
+        const ruleta = document.getElementById('ruleta');
+        const btnGirar = document.getElementById('btnGirar');
+        const displayResultado = document.getElementById('resultado');
+        const temporizadorHTML = document.getElementById("temporizador");
+        const efectoHTML = document.getElementById("efecto-temporizador");
+        const csrf = document.querySelector('meta[name="csrf-token"]').content;
 
-    $(document).ready(function() {
-        // Evento click para las letras
-        $('#alphabet-sidebar').on('click', '.key-container', function() {
-            const container = $(this);
-            const letter = container.data('letter');
+        const TOTAL_SECTORES = 8;
+        const GRADOS_POR_SECTOR = 360 / TOTAL_SECTORES;
+        let anguloActual = 0;
+        let estaGirando = false;
+
+        const opcionesPorSector = [
+            "Demogorgon", "Consonante", "Eleven", "Vocal", 
+            "Vecna", "Consonante", "Demoperro", "Vocal"
+        ];
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando juego...');
+            iniciarTemporizador();
+            actualizarFraseDisplay();
             
-            // Verificar si ya fue clickeada
-            if (container.hasClass('disabled')) {
-                return; 
-            }
-
-            // Verificar restricción de tipo de letra
-            if (tipoSeleccionPermitido === 'vocal' && !vocales.includes(letter)) {
-                $('#result-display').html(`<p style="color: orange;">¡Solo puedes seleccionar VOCALES en este turno!</p>`);
-                return;
-            }
+            // Configurar eventos
+            btnGirar.addEventListener('click', girarRuleta);
+            document.getElementById('btnAdivinar').addEventListener('click', openGuessModal);
             
-            if (tipoSeleccionPermitido === 'consonante' && !consonantes.includes(letter)) {
-                $('#result-display').html(`<p style="color: orange;">¡Solo puedes seleccionar CONSONANTES en este turno!</p>`);
-                return;
-            }
+            // Mostrar título de la película
+            document.querySelector('.titulo-panel').textContent = movieActual;
 
-            // Marcar la tecla como deshabilitada
-            container.addClass('disabled'); 
-
-            // Cambiar imagen a tachada
-            const imageElement = $(`#img-${letter}`);
-            const tachedSrc = imageElement.data('tached-src');
-            imageElement.attr('src', tachedSrc);
-
-            // Llamar a la función principal
-            manejarLetraSeleccionada(letter);
+            // Cargar tiempo desde servidor
+            cargarTiempoDesdeServidor();
         });
-    });
 
-    // Función para manejar letras
-    window.manejarLetraSeleccionada = function(letra) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (!csrfToken) return;
-        
-        fetch("/panel/letra", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken.getAttribute('content')
-            },
-            body: JSON.stringify({ letra: letra })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                revelarLetrasConFlip(letra);
-                $('#result-display').html(`<p style="color: green;">¡Letra ${letra} encontrada!</p>`);
-                
-                // Verificar si se completó la frase
-                setTimeout(verificarFraseCompleta, 500);
-            } else {
-                $('#result-display').html(`<p style="color: red;">La letra ${letra} no está en la frase.</p>`);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            $('#result-display').html(`<p style="color: red;">Error al procesar la letra.</p>`);
-        });
-    };
-
-    // Función para revelar letras
-    function revelarLetrasConFlip(letra) {
-        const letras = document.querySelectorAll(`.letra.oculta[data-letra="${letra.toUpperCase()}"]`);
-        
-        letras.forEach((letraElement, index) => {
-            setTimeout(() => {
-                letraElement.classList.remove('oculta');
-                letraElement.classList.add('revelada');
-            }, index * 200);
-        });
-    }
-
-    // Lógica de la ruleta
-    const ruleta = document.getElementById('ruleta');
-    const btnGirar = document.getElementById('btnGirar');
-    const displayResultado = document.getElementById('resultado');
-    const temporizadorHTML = document.getElementById("temporizador");
-    const efectoHTML = document.getElementById("efecto-temporizador");
-    const csrf = document.querySelector('meta[name="csrf-token"]').content;
-
-    const TOTAL_SECTORES = 8;
-    const GRADOS_POR_SECTOR = 360 / TOTAL_SECTORES;
-    let anguloActual = 0;
-    let estaGirando = false;
-
-    const opcionesPorSector = [
-        "Demogorgon", "Consonante", "Eleven", "Vocal", 
-        "Vecna", "Consonante", "Demoperro", "Vocal"
-    ];
-
-    // --- Lógica del Temporizador ---
-    let tiempoActual = 120;
-    let temporizadorInterval = null;
-
-    function formatoTiempo(seg){ 
-        const m = Math.floor(seg/60); 
-        const s = seg%60; 
-        return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; 
-    }
-
-    // Función para mostrar Game Over
-    function mostrarGameOver() {
-        clearInterval(temporizadorInterval);
-        temporizadorInterval = null;
-        displayResultado.textContent = "¡GAME OVER! Se acabó el tiempo.";
-        btnGirar.disabled = true;
-        
-        // Deshabilitar todas las letras
-        document.querySelectorAll('.key-container').forEach(container => {
-            container.classList.add('disabled');
-        });
-        
-        // Mostrar mensaje en el display de resultados
-        $('#result-display').html('<p style="color: red; font-size: 1.2rem; font-weight: bold;">¡GAME OVER! Se acabó el tiempo.</p>');
-    }
-
-    // Función para mostrar Victoria
-    function mostrarVictoria() {
-        clearInterval(temporizadorInterval);
-        temporizadorInterval = null;
-        displayResultado.textContent = "¡FELICIDADES! Has completado la frase.";
-        btnGirar.disabled = true;
-        
-        // Deshabilitar todas las letras
-        document.querySelectorAll('.key-container').forEach(container => {
-            container.classList.add('disabled');
-        });
-        
-        // Mostrar mensaje en el display de resultados
-        $('#result-display').html('<p style="color: green; font-size: 1.2rem; font-weight: bold;">¡FELICIDADES! Has completado la frase.</p>');
-    }
-
-    // Sincronización con el servidor al cargar la página
-    function cargarTiempoDesdeServidor() {
-        fetch("{{ route('panel.temporizador') }}", {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrf
-            }
-        })
-        .then(resp => {
-            if (!resp.ok) throw new Error('Error en la respuesta del servidor');
-            return resp.json();
-        })
-        .then(data => {
-            if(data.segundos_restantes !== undefined){
-                tiempoActual = parseInt(data.segundos_restantes, 10);
-                temporizadorHTML.textContent = `Tiempo restante: ${formatoTiempo(tiempoActual)}`;
-                
-                // Si el tiempo es 0, mostrar Game Over
-                if (tiempoActual <= 0) {
-                    mostrarGameOver();
+        // ===== TEMPORIZADOR =====
+        function cargarTiempoDesdeServidor() {
+            fetch("/panel/temporizador", {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrf
                 }
-            }
-        })
-        .catch(error => {
-            console.log("Usando tiempo por defecto:", error);
-            // Si hay error, usar 120 por defecto
-            tiempoActual = 120;
-            temporizadorHTML.textContent = `Tiempo restante: ${formatoTiempo(tiempoActual)}`;
-        });
-    }
+            })
+            .then(resp => {
+                if (!resp.ok) throw new Error('Error en la respuesta del servidor');
+                return resp.json();
+            })
+            .then(data => {
+                if(data.segundos_restantes !== undefined){
+                    tiempoRestante = parseInt(data.segundos_restantes, 10);
+                    actualizarTemporizadorDisplay();
+                }
+            })
+            .catch(error => {
+                console.log("Usando tiempo por defecto:", error);
+                tiempoRestante = 180;
+                actualizarTemporizadorDisplay();
+            });
+        }
 
-    // Cargar el tiempo al iniciar la página
-    cargarTiempoDesdeServidor();
+        function iniciarTemporizador() {
+            actualizarTemporizadorDisplay();
+            
+            temporizadorInterval = setInterval(function() {
+                if (tiempoRestante > 0 && juegoActivo) {
+                    tiempoRestante--;
+                    actualizarTemporizadorDisplay();
 
-    function iniciarTemporizador(){
-        if(!temporizadorInterval){
-            temporizadorInterval = setInterval(()=>{
-                if(tiempoActual > 0){
-                    tiempoActual--;
-                    temporizadorHTML.textContent = `Tiempo restante: ${formatoTiempo(tiempoActual)}`;
-                    
-                    // Si el tiempo llega a 0, Game Over
-                    if (tiempoActual <= 0) {
-                        mostrarGameOver();
+                    if (tiempoRestante <= 0) {
+                        finDelJuego();
                     }
                 }
             }, 1000);
         }
-    }
 
-    // --- BOTÓN GIRAR ---
-    btnGirar.addEventListener('click', () => {
-        if (estaGirando) return;
-        estaGirando = true;
-        btnGirar.disabled = true;
-        displayResultado.textContent = "Girando...";
-
-        iniciarTemporizador();
-
-        const vueltasMinimas = 5;
-        const gradosAleatorios = Math.floor(Math.random() * 360);
-        const giroTotal = (vueltasMinimas * 360) + gradosAleatorios;
-
-        anguloActual += giroTotal;
-        ruleta.style.transform = `rotate(${anguloActual}deg)`;
-    });
-
-    ruleta.addEventListener('transitionend', () => {
-        estaGirando = false;
-
-        const gradosNorm = anguloActual % 360;
-        const posicionFlecha = 180; 
-        let gradosResult = (360 - gradosNorm + posicionFlecha) % 360;
-        const indiceGanador = Math.floor(gradosResult / GRADOS_POR_SECTOR);
-        const indiceSeguro = indiceGanador >= 0 ? indiceGanador : 0;
-
-        const opcion = opcionesPorSector[indiceSeguro];
-        displayResultado.textContent = `La ruleta ha caído en: ${opcion}`;
-
-        // Establecer el tipo de letra permitido según la opción
-        if (opcion === 'Vocal') {
-            tipoSeleccionPermitido = 'vocal';
-            $('#result-display').html('<p style="color: blue;">Ahora puedes seleccionar VOCALES</p>');
-        } else if (opcion === 'Consonante') {
-            tipoSeleccionPermitido = 'consonante';
-            $('#result-display').html('<p style="color: blue;">Ahora puedes seleccionar CONSONANTES</p>');
-        } else {
-            tipoSeleccionPermitido = null;
-            $('#result-display').html('<p style="color: blue;">Puedes seleccionar cualquier letra</p>');
+        function actualizarTemporizadorDisplay() {
+            const minutos = Math.floor(tiempoRestante / 60);
+            const segundos = tiempoRestante % 60;
+            temporizadorHTML.textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            
+            // Cambiar estilo según el tiempo
+            temporizadorHTML.classList.remove('timer-warning', 'timer-danger');
+            if (tiempoRestante <= 30) {
+                temporizadorHTML.classList.add('timer-danger');
+            } else if (tiempoRestante <= 60) {
+                temporizadorHTML.classList.add('timer-warning');
+            }
         }
 
-        const efectoLocal = efectoMap[opcion] || 0;
-        if(efectoLocal !== 0){
-            efectoHTML.textContent = efectoLocal > 0 ? `¡${efectoLocal} segundos extras!` : `${efectoLocal} segundos`;
+        // ===== RULETA =====
+        function girarRuleta() {
+            if (estaGirando || !juegoActivo) return;
             
-            efectoHTML.className = 'efecto-temporizador';
-            if(efectoLocal > 0) efectoHTML.classList.add('positivo');
-            else {
-                if(opcion === 'Vecna') efectoHTML.classList.add('rojo-intenso');
-                else if(opcion === 'Demogorgon') efectoHTML.classList.add('rojo-medio');
-                else efectoHTML.classList.add('rojo-claro');
-            }
-            
-            setTimeout(()=> { 
-                efectoHTML.textContent=''; 
-                efectoHTML.className='efecto-temporizador'; 
-            }, 2500);
+            estaGirando = true;
+            btnGirar.disabled = true;
+            displayResultado.textContent = "Girando...";
+
+            const vueltasMinimas = 5;
+            const gradosAleatorios = Math.floor(Math.random() * 360);
+            const giroTotal = (vueltasMinimas * 360) + gradosAleatorios;
+
+            anguloActual += giroTotal;
+            ruleta.style.transform = `rotate(${anguloActual}deg)`;
         }
 
-        // Enviar al servidor para actualizar el temporizador
-        fetch("{{ route('panel.girar') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrf
-            },
-            body: JSON.stringify({ opcion: opcion })
-        })
-        .then(resp => resp.ok ? resp.json() : Promise.reject(resp))
-        .then(json => {
-            if(json.segundos_restantes !== undefined){
-                tiempoActual = parseInt(json.segundos_restantes, 10);
-                temporizadorHTML.textContent = `Tiempo restante: ${formatoTiempo(tiempoActual)}`;
+        ruleta.addEventListener('transitionend', () => {
+            estaGirando = false;
 
-                // Si el tiempo llega a 0, Game Over
-                if (tiempoActual <= 0) {
-                    mostrarGameOver();
-                }
+            const gradosNorm = anguloActual % 360;
+            const posicionFlecha = 180; 
+            let gradosResult = (360 - gradosNorm + posicionFlecha) % 360;
+            const indiceGanador = Math.floor(gradosResult / GRADOS_POR_SECTOR);
+            const indiceSeguro = indiceGanador >= 0 ? indiceGanador : 0;
+
+            const opcion = opcionesPorSector[indiceSeguro];
+            displayResultado.textContent = `La ruleta ha caído en: ${opcion}`;
+
+            // NUEVO: Mostrar mensajes específicos según la opción
+            if (opcion === 'Vocal') {
+                opcionRuletaActual = 'VOCAL';
+                mostrarMensaje('🔊 ¡Ahora puedes seleccionar solo VOCALES!', 'info');
+            } else if (opcion === 'Consonante') {
+                opcionRuletaActual = 'CONSONANTE';
+                mostrarMensaje('🔇 ¡Ahora puedes seleccionar solo CONSONANTES!', 'info');
+            } else if (opcion === 'Eleven') {
+                opcionRuletaActual = null;
+                mostrarMensaje('👧 ¡Eleven! +20 segundos - VUELVE A TIRAR', 'success');
+            } else if (opcion === 'Vecna') {
+                opcionRuletaActual = null;
+                mostrarMensaje('👹 ¡Vecna! -20 segundos - VUELVE A TIRAR', 'error');
+            } else if (opcion === 'Demogorgon') {
+                opcionRuletaActual = null;
+                mostrarMensaje('👺 ¡Demogorgon! -10 segundos - VUELVE A TIRAR', 'error');
+            } else if (opcion === 'Demoperro') {
+                opcionRuletaActual = null;
+                mostrarMensaje('🐕 ¡Demoperro! -5 segundos - VUELVE A TIRAR', 'error');
             }
-        })
-        .catch(err => {
-            console.error('Error:', err);
-        })
-        .finally(() => {
+
+            // Aplicar efectos de tiempo
+            aplicarEfectoRuleta(opcion);
+            actualizarAbecedario();
+            
             btnGirar.disabled = false;
         });
-    });
 
-    // Mapa de efectos (puntuación)
-    const efectoMap = {
-        "Vocal": 0, 
-        "Consonante": 0, 
-        "Demoperro": -5, 
-        "Demogorgon": -10, 
-        "Vecna": -20, 
-        "Eleven": 20
-    };
-
-    // Función para verificar si se completó la frase
-    function verificarFraseCompleta() {
-        const letrasOcultas = document.querySelectorAll('.letra.oculta');
-        
-        if (letrasOcultas.length === 0) {
-            mostrarVictoria();
-        }
-    }
-
-    // Observador para cambios en las letras
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                setTimeout(verificarFraseCompleta, 100);
+        function aplicarEfectoRuleta(opcion) {
+            let cambioTiempo = 0;
+            
+            switch(opcion) {
+                case 'Vocal':
+                case 'Consonante':
+                    // No cambia el tiempo, solo permite seleccionar letras
+                    break;
+                case 'Vecna':
+                    cambioTiempo = -20;
+                    efectoHTML.textContent = '👹 ¡Vecna te quita 20 segundos!';
+                    efectoHTML.className = 'efecto-temporizador rojo-intenso';
+                    break;
+                case 'Demogorgon':
+                    cambioTiempo = -10;
+                    efectoHTML.textContent = '👺 ¡Demogorgon te quita 10 segundos!';
+                    efectoHTML.className = 'efecto-temporizador rojo-medio';
+                    break;
+                case 'Demoperro':
+                    cambioTiempo = -5;
+                    efectoHTML.textContent = '🐕 ¡Demoperro te quita 5 segundos!';
+                    efectoHTML.className = 'efecto-temporizador rojo-claro';
+                    break;
+                case 'Eleven':
+                    cambioTiempo = 20;
+                    efectoHTML.textContent = '👧 ¡Eleven te da 20 segundos extra!';
+                    efectoHTML.className = 'efecto-temporizador positivo';
+                    break;
             }
+
+            if (cambioTiempo !== 0) {
+                tiempoRestante = Math.max(0, tiempoRestante + cambioTiempo);
+                actualizarTemporizadorDisplay();
+
+                fetch("/panel/girar", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: JSON.stringify({ 
+                        opcion: opcion,
+                        tiempo_actual: tiempoRestante
+                    })
+                })
+                .then(resp => resp.ok ? resp.json() : Promise.reject(resp))
+                .then(json => {
+                    console.log('Tiempo actualizado en servidor:', json);
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                });
+
+                setTimeout(() => {
+                    efectoHTML.textContent = '';
+                }, 3000);
+            }
+        }
+
+        // ===== SISTEMA DE LETRAS =====
+        function seleccionarLetra(letra) {
+            if (!juegoActivo) {
+                mostrarMensaje('El juego ha terminado', 'error');
+                return;
+            }
+
+            if (letrasUsadas.includes(letra)) {
+                mostrarMensaje('⚠️ Esta letra ya fue usada', 'warning');
+                return;
+            }
+
+            if (opcionRuletaActual === 'VOCAL' && !'AEIOU'.includes(letra)) {
+                mostrarMensaje('❌ Solo puedes seleccionar VOCALES', 'error');
+                return;
+            }
+            
+            if (opcionRuletaActual === 'CONSONANTE' && 'AEIOU'.includes(letra)) {
+                mostrarMensaje('❌ Solo puedes seleccionar CONSONANTES', 'error');
+                return;
+            }
+
+            if (!opcionRuletaActual) {
+                mostrarMensaje('🎡 Gira la ruleta primero para seleccionar letras', 'warning');
+                return;
+            }
+
+            letrasUsadas.push(letra);
+            const keyContainer = document.querySelector(`[data-letter="${letra}"]`);
+            keyContainer.classList.add('disabled');
+
+            const imageElement = document.getElementById(`img-${letra}`);
+            if (imageElement) {
+                const tachedSrc = imageElement.getAttribute('data-tached-src');
+                if (tachedSrc) {
+                    imageElement.setAttribute('src', tachedSrc);
+                }
+            } else {
+                const keyContent = keyContainer.querySelector('.key-content');
+                if (keyContent) {
+                    keyContent.classList.add('letra-tachada');
+                }
+            }
+
+            const existe = fraseActual.toUpperCase().includes(letra);
+            
+            if (existe) {
+                mostrarMensaje(`✅ ¡Letra ${letra} encontrada! +10 puntos`, 'success');
+                actualizarPuntuacion(10);
+                revelarLetra(letra);
+                verificarFraseCompleta();
+            } else {
+                mostrarMensaje(`❌ Letra ${letra} no encontrada`, 'error');
+            }
+
+            opcionRuletaActual = null;
+            actualizarAbecedario();
+        }
+
+        function revelarLetra(letra) {
+            const letraElements = document.querySelectorAll('.letra');
+            letraElements.forEach(element => {
+                const letraOculta = element.getAttribute('data-letra');
+                if (letraOculta === letra) {
+                    element.classList.add('revelada');
+                    element.querySelector('.letra-texto').textContent = letra;
+                }
+            });
+        }
+
+        function actualizarFraseDisplay() {
+            const fraseContainer = document.getElementById('frase-container');
+            fraseContainer.innerHTML = '';
+            
+            const palabras = fraseActual.split(' ');
+            
+            palabras.forEach(palabra => {
+                const palabraDiv = document.createElement('div');
+                palabraDiv.className = 'palabra';
+                
+                for (let i = 0; i < palabra.length; i++) {
+                    const letra = palabra[i].toUpperCase();
+                    const letraDiv = document.createElement('div');
+                    letraDiv.className = 'letra';
+                    letraDiv.setAttribute('data-letra', letra);
+                    
+                    letraDiv.innerHTML = `
+                        <div class="postit"></div>
+                        <div class="letra-texto"></div>
+                    `;
+                    
+                    palabraDiv.appendChild(letraDiv);
+                }
+                
+                fraseContainer.appendChild(palabraDiv);
+                
+                if (palabras.indexOf(palabra) < palabras.length - 1) {
+                    const espacio = document.createElement('div');
+                    espacio.className = 'espacio';
+                    espacio.style.width = '15px';
+                    espacio.style.height = '2.5rem';
+                    fraseContainer.appendChild(espacio);
+                }
+            });
+
+            letrasUsadas.forEach(letra => revelarLetra(letra));
+            ajustarTamañoPanel();
+        }
+
+        function ajustarTamañoPanel() {
+            const fraseContainer = document.getElementById('frase-container');
+            const panelContainer = document.querySelector('.panel-container');
+            
+            // Calcular tamaño necesario basado en el contenido
+            const contenidoHeight = fraseContainer.scrollHeight;
+            const maxHeight = window.innerHeight * 0.3;
+            
+            // Ajustar altura del panel
+            panelContainer.style.height = 'auto';
+            panelContainer.style.minHeight = Math.min(contenidoHeight, maxHeight) + 'px';
+        }
+
+        function actualizarAbecedario() {
+            const keys = document.querySelectorAll('.key-container');
+            keys.forEach(key => {
+                const letra = key.getAttribute('data-letter');
+                
+                key.classList.remove('vocal-active', 'consonante-active', 'disabled');
+                
+                if (letrasUsadas.includes(letra)) {
+                    key.classList.add('disabled');
+                } 
+                else if (opcionRuletaActual === 'VOCAL' && 'AEIOU'.includes(letra)) {
+                    key.classList.add('vocal-active');
+                } 
+                else if (opcionRuletaActual === 'CONSONANTE' && !'AEIOU'.includes(letra)) {
+                    key.classList.add('consonante-active');
+                }
+            });
+        }
+
+        function actualizarPuntuacion(puntos) {
+            puntuacion = Math.max(0, puntuacion + puntos);
+            document.getElementById('puntos-actuales').textContent = puntuacion;
+        }
+
+        function verificarFraseCompleta() {
+            const letrasReveladas = document.querySelectorAll('.letra.revelada').length;
+            const totalLetras = document.querySelectorAll('.letra').length;
+            
+            if (letrasReveladas === totalLetras && totalLetras > 0) {
+                mostrarVictoria();
+            }
+        }
+
+        // ===== SISTEMA DE ADIVINANZA =====
+        function openGuessModal() {
+            if (!juegoActivo) {
+                mostrarMensaje('El juego ha terminado', 'error');
+                return;
+            }
+            document.getElementById('guessModal').style.display = 'flex';
+            document.getElementById('guessInput').focus();
+            document.getElementById('guessInput').value = '';
+        }
+
+        function closeGuessModal() {
+            document.getElementById('guessModal').style.display = 'none';
+        }
+
+        function confirmGuess() {
+            const guess = document.getElementById('guessInput').value.trim().toUpperCase();
+            if (!guess) {
+                mostrarMensaje('Por favor escribe una frase', 'warning');
+                return;
+            }
+
+            closeGuessModal();
+
+            const fraseCorrecta = fraseActual.toUpperCase();
+            if (guess === fraseCorrecta) {
+                document.querySelectorAll('.letra').forEach(letra => {
+                    letra.classList.add('revelada');
+                    const letraOculta = letra.getAttribute('data-letra');
+                    letra.querySelector('.letra-texto').textContent = letraOculta;
+                });
+                mostrarVictoria();
+            } else {
+                mostrarMensaje('❌ ¡Frase incorrecta! GAME OVER', 'error');
+                finDelJuego();
+            }
+        }
+
+        // ===== FIN DEL JUEGO =====
+        function mostrarVictoria() {
+            juegoActivo = false;
+            clearInterval(temporizadorInterval);
+            actualizarPuntuacion(100);
+            
+            mostrarMensaje('🎉 ¡FELICIDADES! Has completado la frase +100 puntos', 'success');
+            
+            btnGirar.disabled = true;
+            document.querySelectorAll('.key-container').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            document.getElementById('btnAdivinar').disabled = true;
+            
+            document.querySelector('.layout-container').classList.add('juego-inactivo');
+        }
+
+        function finDelJuego() {
+            juegoActivo = false;
+            clearInterval(temporizadorInterval);
+            
+            mostrarMensaje('⏰ ¡GAME OVER! Tiempo agotado', 'error');
+            
+            btnGirar.disabled = true;
+            document.querySelectorAll('.key-container').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            document.getElementById('btnAdivinar').disabled = true;
+            
+            document.querySelector('.layout-container').classList.add('juego-inactivo');
+        }
+
+        // ===== UTILIDADES =====
+        function mostrarMensaje(mensaje, tipo) {
+            const resultDisplay = document.getElementById('result-display');
+            resultDisplay.textContent = mensaje;
+            resultDisplay.style.display = 'block';
+            
+            const colores = {
+                'success': '#4CAF50',
+                'error': '#f44336', 
+                'warning': '#ff9800',
+                'info': '#2196F3'
+            };
+            
+            resultDisplay.style.backgroundColor = colores[tipo] || '#333';
+            resultDisplay.style.borderLeftColor = colores[tipo] || '#ffd700';
+
+            setTimeout(() => {
+                resultDisplay.style.display = 'none';
+            }, 3000);
+        }
+
+        function resetGame() {
+            if (confirm('¿Estás seguro de que quieres reiniciar el juego?')) {
+                window.location.reload();
+            }
+        }
+
+        function logout() {
+            if (confirm('¿Estás seguro de que quieres salir?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        // Observador para cambios en las letras
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    setTimeout(verificarFraseCompleta, 100);
+                }
+            });
         });
-    });
 
-    // Observar cambios en las letras
-    document.querySelectorAll('.letra').forEach(letra => {
-        observer.observe(letra, { attributes: true, attributeFilter: ['class'] });
-    });
+        // Ajustar panel cuando cambie el tamaño de la ventana
+        window.addEventListener('resize', ajustarTamañoPanel);
 
-    // Verificar al cargar la página por si ya está completa
-    setTimeout(verificarFraseCompleta, 1000);
-</script>
+        setTimeout(() => {
+            document.querySelectorAll('.letra').forEach(letra => {
+                observer.observe(letra, { attributes: true, attributeFilter: ['class'] });
+            });
+        }, 1000);
+    </script>
 </body>
 </html>

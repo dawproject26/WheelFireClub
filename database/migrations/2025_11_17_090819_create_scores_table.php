@@ -6,17 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('scores', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('player_id')->constrained('players')->onDelete('cascade');
+            $table->foreignId('player_id');
             $table->integer('score')->default(0);
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('scores');
     }

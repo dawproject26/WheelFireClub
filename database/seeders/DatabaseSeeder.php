@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\PanelSeeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,8 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
         PanelSeeder::class,  // Línea para llamar al seeder de Panel
     ]);
-        User::factory()->create([   
-           
-        ]);
+
     }
 }
