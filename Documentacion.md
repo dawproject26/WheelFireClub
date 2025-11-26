@@ -4,7 +4,7 @@
 
 ### Descripción General
 Controlador de Laravel encargado de gestionar la lógica principal del juego de adivinanzas. Maneja las sesiones de jugadores, la ruleta, el temporizador y la verificación de letras.
-
+g
 ### Ubicación
 `App\Http\Controllers\PanelController`
 
