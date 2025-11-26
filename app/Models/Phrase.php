@@ -1,19 +1,26 @@
 <?php
 
-
 namespace App\Models;
-
 
 use Illuminate\Database\Eloquent\Model;
 
-
 class Phrase extends Model
 {
-protected $fillable = ['panel_id', 'phrase'];
+    protected $table = 'phrases';
 
+    protected $fillable = [
+        'movie',
+        'phrase',
+        'panel_id'
+    ];
 
-public function panel()
-{
-return $this->belongsTo(Panel::class);
-}
+    protected $dates = [
+        'created_at',
+        'updated_at'
+    ];
+
+    public function panel()
+    {
+        return $this->belongsTo(Panel::class);
+    }
 }

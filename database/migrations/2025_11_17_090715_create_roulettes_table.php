@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('roulette', function (Blueprint $table) {
             $table->id();
-            $table->string('option');   // TU ÚNICA VARIABLE
+
+            $table->string('option');
             $table->timestamps();
         });
     }
