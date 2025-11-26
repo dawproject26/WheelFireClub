@@ -307,3 +307,26 @@ body{
     opacity: 0;
     pointer-events: none;
 }
+
+/*
+ * -----------------------------------------------------
+ * 8. BOTÓN RANKING
+ * -----------------------------------------------------
+ */
+
+.ranking-top-right {
+    position: absolute;
+    top: 68%;
+    left: 48.5%;
+    transform: none; /* Elimina la traducción que lo movía */
+    cursor: pointer;
+    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #e20000;
+    border-radius: 10px;
+    z-index: 10;
+}
+ 
+.ranking-top-right:hover {
+    box-shadow: 0 0 20px #e20000; 
+}

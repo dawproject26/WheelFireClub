@@ -21,6 +21,9 @@
         <div class="centered-button" id="login-button">
             <span class="stranger-things-text">INICIAR SESIÓN</span>
         </div>
+        <div class="ranking-top-right" id="ranking-button"> 
+            <span class="stranger-things-text">RANKING</span>
+        </div>
         <div class="centered-button2" id="register-button"> 
             <span class="stranger-things-text">REGISTRARSE</span>
         </div>
@@ -77,6 +80,9 @@
         loginWrapper.style.display = 'none';
         registerWrapper.style.display = 'flex';
     });
+     document.getElementById('ranking-button').addEventListener('click', function() {
+            window.location.href = '/ranking';
+    });
 
     // --- Lógica del Avatar ---
     const avatarDisplay = document.getElementById('avatar-display');
@@ -101,6 +107,7 @@
     });
 
     updateAvatarDisplay();
+
 </script>
 </body>
 </html>

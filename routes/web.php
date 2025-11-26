@@ -4,7 +4,9 @@ use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\RouletteController;
 use App\Http\Controllers\ScoreController;
+use App\Http\Controllers\RankingController;
 use Illuminate\Support\Facades\Route;
+
 
 // Ruta PRINCIPAL - Página de bienvenida
 Route::get('/', function () {
@@ -15,6 +17,7 @@ Route::get('/', function () {
 Route::post('/login', [PlayerController::class, 'login'])->name('player.login');
 Route::post('/register', [PlayerController::class, 'register'])->name('player.register');
 Route::get('/logout', [PlayerController::class, 'logout'])->name('player.logout');
+Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
 
 // Rutas del panel del juego
 Route::middleware(['web'])->group(function () {
