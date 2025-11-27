@@ -162,7 +162,7 @@ Controlador de Laravel encargado de gestionar la lógica principal del juego de 
 - La validación de vocales/consonantes es case-insensitive (se convierte a mayúscula)
 
 # Documentación del PlayerController
-
+ubicación del archivo: app/Http/Controllers/PlayerController.php
 ## Descripción General
 
 Este controlador gestiona todo lo relacionado con los jugadores en la aplicación: registro, inicio de sesión y cierre de sesión. Es el punto de entrada principal para que los usuarios accedan al sistema.
@@ -292,7 +292,7 @@ Este controlador depende de:
 - Vistas: `welcome` y rutas hacia `panel.index`
 
 # Documentación del PlayerController
-
+ubicación del archivo: app/Http/Controllers/PlayerController.php
 ## Descripción General
 
 Este controlador gestiona todo lo relacionado con los jugadores en la aplicación: registro, inicio de sesión y cierre de sesión. Es el punto de entrada principal para que los usuarios accedan al sistem
@@ -421,7 +421,7 @@ Este controlador depende de:
 - Vistas: `welcome` y rutas hacia `panel.index`
 
   # Documentación del ProfileController
-
+ubicación del archivo: app/Http/Controllers/ProfileController.php
 ## Descripción General
 
 Este controlador gestiona el perfil de usuario: permite ver, editar y eliminar la cuenta del usuario autenticado. Es parte del sistema de autenticación estándar de Laravel.
@@ -567,6 +567,7 @@ Este controlador depende de:
 - Gestión completa de usuarios con email verificado
 
 # Documentación del RankingController
+ubicación del archivo: app/Http/Controllers/RankingController.php
 
 ## Descripción General
 Este controlador se encarga de gestionar el ranking de jugadores en la aplicación. Su función principal es obtener y mostrar los 10 mejores jugadores ordenados por su puntuación.
@@ -658,7 +659,7 @@ En la vista `ranking.blade.php`:
 
 
 # Documentación del RouletteController
-
+ubicación del archivo: app/Http/Controllers/RouletteController.php
 ## Descripción General
 
 Este controlador gestiona la ruleta del juego, que permite a los jugadores girar una ruleta para obtener opciones aleatorias (vocales, consonantes o personajes especiales) y aplicar sus efectos sobre el temporizador del jugador.
@@ -818,7 +819,7 @@ Este controlador depende de:
 5. **Animaciones** coordinadas entre frontend y backend
 
 # Documentación del ScoreController
-
+ubicación del archivo: app/Http/Controllers/ScoreController.php
 ## Descripción General
 
 Este controlador gestiona el sistema de puntuación del juego. Permite a los jugadores adivinar letras individuales o intentar resolver frases completas, actualizando su puntuación según los aciertos o errores.
@@ -1453,7 +1454,7 @@ public function handle(Request $request, Closure $next)
 }
 ```
 # Documentación del Middleware CheckPlayerSession
-
+ubicación del archivo: app/Http/Middleware/CheckPlayerSession.php
 ## Descripción
 Middleware que verifica si existe una sesión activa de jugador antes de permitir el acceso a una ruta. Si no existe sesión, redirige a la página principal.
 
@@ -1535,7 +1536,7 @@ Array con las reglas de validación para los campos del formulario
 - `Rule::unique(User::class)->ignore($this->user()->id)`: Debe ser único en la tabla de usuarios, excepto el email del usuario actual
 
 # Documentación del Modelo Panel
-
+ubicación del archivo: 
 ## Descripción
 Modelo que representa un panel en la base de datos. Un panel puede contener múltiples frases.
 
@@ -2030,7 +2031,8 @@ foreach ($phrases as $phraseData) {
 ```
 
 # Documentación del RouletteSeeder
-
+Ubicación del Archivo
+database/seeders/RouletteSeeder.php
 ## Descripción General
 Este seeder pobla la base de datos con las opciones disponibles para una ruleta. Inserta 8 opciones que incluyen elementos del juego (vocales y consonantes) y personajes de la serie Stranger Things, creando una mecánica de juego temática.
 
