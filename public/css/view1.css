@@ -65,6 +65,7 @@ body{
 /* El Mundo del Revés está oculto al inicio */
 #upside-down {
     opacity: 0;
+    z-index: 5;
 }
  
 /*
@@ -183,7 +184,7 @@ body{
     left: 55%; 
     transform: translate(-50%, -50%);
     display: flex; 
-    z-index: 10;
+    z-index: 7;
     max-width: 90%; 
 }
 
@@ -198,13 +199,16 @@ body{
 
 /* Estilo para los botones JUGAR/REGISTRAR (Aplica a los nuevos IDs) */
 #botonjugar_login, #botonjugar_register {
-    position: static; 
+    position: absolute; 
     transform: none; 
     cursor: pointer;
     padding: 15px 30px;
     background: rgba(0, 0, 0, 0.7);
     border: 3px solid #e20000;
     border-radius: 10px;
+    top: 45.5%;
+    left: 63%;
+    z-index: 8;
 }
 
 #botonjugar_login:hover, #botonjugar_register:hover {
@@ -218,7 +222,10 @@ body{
     border-radius: 10px;
     padding: 15px 30px; 
     color: #e20000;
-    font-size: 1.2em; 
+    font-size: 1.2em;
+    position: absolute;
+    top: 45%;
+    left: 43%;
 }
 
 /* Selector específico para asegurar que el placeholder sea visible y rojo */
@@ -241,8 +248,8 @@ body{
     transition: box-shadow 0.3s ease; 
     
     /* Posicionamiento del avatar */
-    top: 40%;
-    left: 32.5%;
+    top: 48%;
+    left: 34%;
     transform: translate(-50%, -50%);
     z-index: 10;
 }

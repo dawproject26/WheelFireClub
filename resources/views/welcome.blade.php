@@ -52,7 +52,7 @@
             <form action="{{ route('player.register') }}" method="POST">
                 @csrf
                 <input id="cuadrotexto_register" type="text" name="name" placeholder="Nombre" required>
-                <button id="botonjugar_register" class="stranger-things-text" type="submit">REGISTRAR</button>
+                <button id="botonjugar_register" class="stranger-things-text" type="submit">JUGAR</button>
                 <input type="hidden" name="idavatar" id="idavatar" value="1">
             </form> 
         </div> 
