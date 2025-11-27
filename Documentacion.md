@@ -656,12 +656,6 @@ En la vista `ranking.blade.php`:
 @endforeach
 ```
 
-## Posibles Mejoras
-
-- Añadir paginación si hay más de 10 jugadores
-- Agregar caché para mejorar el rendimiento
-- Incluir fecha de la última puntuación
-- Añadir filtros por período de tiempo (diario, semanal, mensual)
 
 # Documentación del RouletteController
 
@@ -1540,9 +1534,344 @@ Array con las reglas de validación para los campos del formulario
 - `max:255`: Máximo 255 caracteres
 - `Rule::unique(User::class)->ignore($this->user()->id)`: Debe ser único en la tabla de usuarios, excepto el email del usuario actual
 
+# Documentación del Modelo Panel
 
+## Descripción
+Modelo que representa un panel en la base de datos. Un panel puede contener múltiples frases.
 
+## Namespace
+```php
+namespace App\Models;
+```
 
+## Dependencias
+- `Illuminate\Database\Eloquent\Model`: Clase base de Eloquent ORM
+
+## Propiedades
+
+### $fillable
+```php
+protected $fillable = ['title'];
+```
+Campos que se pueden asignar masivamente:
+- `title`: Título del panel
+
+## Relaciones
+
+### phrases()
+```php
+public function phrases()
+{
+    return $this->hasMany(Phrase::class);
+}
+```
+
+**Tipo:** Uno a muchos (hasMany)
+
+**Descripción:** Un panel tiene muchas frases
+
+**Retorna:** Colección de objetos `Phrase` asociados al panel
+
+**Uso:**
+```php
+$panel = Panel::find(1);
+$frases = $panel->phrases; // Obtiene todas las frases del panel
+```
+# Documentación del Modelo Phrase
+
+## Descripción
+Modelo que representa una frase en la base de datos. Cada frase pertenece a un panel específico.
+
+## Namespace
+```php
+namespace App\Models;
+```
+
+## Dependencias
+- `Illuminate\Database\Eloquent\Model`: Clase base de Eloquent ORM
+
+## Propiedades
+
+### $table
+```php
+protected $table = 'phrases';
+```
+Nombre de la tabla en la base de datos: `phrases`
+
+### $fillable
+```php
+protected $fillable = ['movie', 'phrase', 'panel_id'];
+```
+Campos que se pueden asignar masivamente:
+- `movie`: Nombre de la película
+- `phrase`: Texto de la frase
+- `panel_id`: ID del panel al que pertenece
+
+### $dates
+```php
+protected $dates = ['created_at', 'updated_at'];
+```
+Campos que se tratarán como fechas (Carbon):
+- `created_at`: Fecha de creación
+- `updated_at`: Fecha de última actualización
+
+## Relaciones
+
+### panel()
+```php
+public function panel()
+{
+    return $this->belongsTo(Panel::class);
+}
+```
+
+**Tipo:** Muchos a uno (belongsTo)
+
+**Descripción:** Una frase pertenece a un panel
+
+**Retorna:** Objeto `Panel` al que pertenece la frase
+
+**Uso:**
+```php
+$phrase = Phrase::find(1);
+$panel = $phrase->panel; // Obtiene el panel de la frase
+```
+# Documentación del Modelo Player
+
+## Descripción
+Modelo que representa un jugador en la base de datos. Cada jugador tiene asociado un score y un timer.
+
+## Namespace
+```php
+namespace App\Models;
+```
+
+## Dependencias
+- `Illuminate\Database\Eloquent\Model`: Clase base de Eloquent ORM
+
+## Propiedades
+
+### $fillable
+```php
+protected $fillable = ['name', 'idavatar'];
+```
+Campos que se pueden asignar masivamente:
+- `name`: Nombre del jugador
+- `idavatar`: ID del avatar del jugador
+
+## Relaciones
+
+### score()
+```php
+public function score()
+{
+    return $this->hasOne(Score::class);
+}
+```
+
+**Tipo:** Uno a uno (hasOne)
+
+**Descripción:** Un jugador tiene una puntuación
+
+**Retorna:** Objeto `Score` asociado al jugador
+
+**Uso:**
+```php
+$player = Player::find(1);
+$puntuacion = $player->score; // Obtiene el score del jugador
+```
+
+### timer()
+```php
+public function timer()
+{
+    return $this->hasOne(Timer::class);
+}
+```
+
+**Tipo:** Uno a uno (hasOne)
+
+**Descripción:** Un jugador tiene un temporizador
+
+**Retorna:** Objeto `Timer` asociado al jugador
+
+**Uso:**
+```php
+$player = Player::find(1);
+$tiempo = $player->timer; // Obtiene el timer del jugador
+```
+# Documentación del Modelo Roulette
+
+## Descripción
+Modelo que representa una opción de la ruleta en la base de datos.
+
+## Namespace
+```php
+namespace App\Models;
+```
+
+## Dependencias
+- `Illuminate\Database\Eloquent\Model`: Clase base de Eloquent ORM
+
+## Propiedades
+
+### $table
+```php
+protected $table = 'roulette';
+```
+Nombre de la tabla en la base de datos: `roulette`
+
+### $fillable
+```php
+protected $fillable = ['option'];
+```
+Campos que se pueden asignar masivamente:
+- `option`: Opción o valor de la ruleta
+
+# Documentación del Modelo Score
+
+## Descripción
+Modelo que representa la puntuación de un jugador en la base de datos. Cada puntuación pertenece a un jugador específico.
+
+## Namespace
+```php
+namespace App\Models;
+```
+
+## Dependencias
+- `Illuminate\Database\Eloquent\Model`: Clase base de Eloquent ORM
+
+## Propiedades
+
+### $fillable
+```php
+protected $fillable = ['player_id', 'score'];
+```
+Campos que se pueden asignar masivamente:
+- `player_id`: ID del jugador
+- `score`: Puntuación del jugador
+
+## Relaciones
+
+### player()
+```php
+public function player()
+{
+    return $this->belongsTo(Player::class);
+}
+```
+
+**Tipo:** Muchos a uno (belongsTo)
+
+**Descripción:** Una puntuación pertenece a un jugador
+
+**Retorna:** Objeto `Player` al que pertenece la puntuación
+
+**Uso:**
+```php
+$score = Score::find(1);
+$jugador = $score->player; // Obtiene el jugador de la puntuación
+```
+# Documentación del Modelo Timer
+
+## Descripción
+Modelo que representa el temporizador de un jugador en la base de datos. Cada temporizador pertenece a un jugador específico.
+
+## Namespace
+```php
+namespace App\Models;
+```
+
+## Dependencias
+- `Illuminate\Database\Eloquent\Model`: Clase base de Eloquent ORM
+
+## Propiedades
+
+### $fillable
+```php
+protected $fillable = ['player_id', 'seconds'];
+```
+Campos que se pueden asignar masivamente:
+- `player_id`: ID del jugador
+- `seconds`: Segundos del temporizador
+
+## Relaciones
+
+### player()
+```php
+public function player()
+{
+    return $this->belongsTo(Player::class);
+}
+```
+
+**Tipo:** Muchos a uno (belongsTo)
+
+**Descripción:** Un temporizador pertenece a un jugador
+
+**Retorna:** Objeto `Player` al que pertenece el temporizador
+
+**Uso:**
+```php
+$timer = Timer::find(1);
+$jugador = $timer->player; // Obtiene el jugador del temporizador
+```
+# Documentación del Modelo User
+
+## Descripción
+Modelo que representa un usuario autenticable en la base de datos. Hereda de `Authenticatable` para gestionar la autenticación.
+
+## Namespace
+```php
+namespace App\Models;
+```
+
+## Dependencias
+- `Illuminate\Database\Eloquent\Factories\HasFactory`: Trait para crear factories
+- `Illuminate\Foundation\Auth\User as Authenticatable`: Clase base para usuarios autenticables
+- `Illuminate\Notifications\Notifiable`: Trait para enviar notificaciones
+
+## Traits Utilizados
+- `HasFactory`: Permite crear instancias de prueba del modelo
+- `Notifiable`: Permite enviar notificaciones al usuario
+
+## Propiedades
+
+### $fillable
+```php
+protected $fillable = ['name', 'email', 'password'];
+```
+Campos que se pueden asignar masivamente:
+- `name`: Nombre del usuario
+- `email`: Correo electrónico del usuario
+- `password`: Contraseña del usuario
+
+### $hidden
+```php
+protected $hidden = ['password', 'remember_token'];
+```
+Campos que se ocultan al serializar (JSON/arrays):
+- `password`: Contraseña encriptada
+- `remember_token`: Token de "recordar sesión"
+
+## Métodos
+
+### casts()
+```php
+protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+}
+```
+
+**Descripción:** Define cómo se convierten los atributos al acceder a ellos
+
+**Conversiones:**
+- `email_verified_at`: Se convierte a objeto DateTime/Carbon
+- `password`: Se encripta automáticamente al asignarlo
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
