@@ -566,6 +566,103 @@ Este controlador depende de:
 - Requiere contraseña para acciones críticas
 - Gestión completa de usuarios con email verificado
 
+# Documentación del RankingController
+
+## Descripción General
+Este controlador se encarga de gestionar el ranking de jugadores en la aplicación. Su función principal es obtener y mostrar los 10 mejores jugadores ordenados por su puntuación.
+
+## Namespace y Dependencias
+```php
+namespace App\Http\Controllers;
+```
+- El controlador está ubicado en el namespace estándar de controladores de Laravel.
+
+### Clases Importadas
+- `Illuminate\Http\Request`: Para manejar las peticiones HTTP (aunque no se usa en este controlador actualmente)
+- `App\Http\Controllers\Controller`: Clase base de los controladores
+- `Illuminate\Support\Facades\DB`: Fachada para realizar consultas a la base de datos
+
+## Clase RankingController
+
+### Método: `index()`
+
+**Propósito:** Obtiene los 10 jugadores con las puntuaciones más altas y los envía a la vista.
+
+**Ruta sugerida:** Típicamente se accede mediante una ruta GET como `/ranking`
+
+**Retorno:** Devuelve una vista llamada `ranking` con los datos de los mejores jugadores.
+
+#### Funcionamiento Paso a Paso
+
+1. **Consulta a la base de datos:**
+   - Se conecta a la tabla `players` (jugadores)
+   - Hace un JOIN con la tabla `scores` (puntuaciones) usando el campo `player_id`
+   - Selecciona tres campos: `id` del jugador, `name` (nombre) y `score` (puntuación)
+
+2. **Ordenamiento:**
+   - Ordena los resultados por la columna `score` de forma descendente (de mayor a menor)
+   - `DESC` significa que las puntuaciones más altas aparecen primero
+
+3. **Limitación:**
+   - Usa `take(10)` para obtener solo los 10 primeros resultados
+
+4. **Ejecución:**
+   - `get()` ejecuta la consulta y devuelve los resultados
+
+5. **Retorno de vista:**
+   - Envía los datos a la vista `ranking.blade.php`
+   - La variable `$topPlayers` estará disponible en la vista con los 10 mejores jugadores
+
+#### Estructura de Datos Retornada
+
+La variable `$topPlayers` contiene una colección con esta estructura:
+```
+[
+    {
+        "id": 1,
+        "name": "Juan Pérez",
+        "score": 9500
+    },
+    {
+        "id": 2,
+        "name": "María García",
+        "score": 8750
+    },
+    ...
+]
+```
+
+## Tablas de Base de Datos Involucradas
+
+### Tabla `players`
+- `id`: Identificador único del jugador
+- `name`: Nombre del jugador
+
+### Tabla `scores`
+- `player_id`: Relación con el jugador
+- `score`: Puntuación del jugador
+
+## Ejemplo de Uso
+
+En tu archivo de rutas (`web.php`):
+```php
+Route::get('/ranking', [RankingController::class, 'index']);
+```
+
+En la vista `ranking.blade.php`:
+```blade
+@foreach($topPlayers as $player)
+    <li>{{ $player->name }}: {{ $player->score }} puntos</li>
+@endforeach
+```
+
+## Posibles Mejoras
+
+- Añadir paginación si hay más de 10 jugadores
+- Agregar caché para mejorar el rendimiento
+- Incluir fecha de la última puntuación
+- Añadir filtros por período de tiempo (diario, semanal, mensual)
+
 # Documentación del RouletteController
 
 ## Descripción General
@@ -1211,105 +1308,237 @@ broadcast(new TimerUpdated($player_id, $seconds));
 
 **TimerController** es un controlador minimalista enfocado en una única responsabilidad: consultar el tiempo restante de un jugador. Su simplicidad lo hace fácil de mantener y entender, pero también presenta oportunidades de optimización para aplicaciones de alta frecuencia de actualización.
 
+# Documentación del Middleware CheckPlayerSession
 
+## Descripción General
+Este middleware actúa como un guardián de seguridad para tu aplicación. Se encarga de verificar que el usuario tenga una sesión activa antes de permitirle acceder a ciertas páginas. Si no está autenticado, lo redirige a la página principal.
 
+## Namespace y Dependencias
+```php
+namespace App\Http\Middleware;
+```
+- El middleware está ubicado en el namespace estándar de middlewares de Laravel.
 
+### Clases Importadas
+- `Closure`: Representa la siguiente acción en la cadena de middlewares
+- `Illuminate\Http\Request`: Contiene la información de la petición HTTP actual
 
+## Clase CheckPlayerSession
 
+### Método: `handle()`
 
+**Propósito:** Verificar que existe un jugador con sesión activa antes de permitir el acceso a una ruta protegida.
 
-PANEL DEL ABECEDARIO Y SU LÓGICA
+**Parámetros:**
+- `$request`: La petición HTTP que está intentando acceder a la ruta
+- `$next`: La siguiente acción a ejecutar si el middleware permite continuar
 
-index.blade.php
+**Retorno:** 
+- Si la verificación falla: Redirige a la página principal (`/`)
+- Si la verificación es exitosa: Permite continuar con la petición normal
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ffea737b-2a7d-4c53-9453-aa116c474dcb" />
+#### Funcionamiento Paso a Paso
 
-1. Encabezado HTML y Configuración
+1. **Verificación de sesión:**
+```php
+   if (!session()->has('player_id'))
+```
+   - Comprueba si existe una variable llamada `player_id` en la sesión
+   - El símbolo `!` significa "NO existe"
 
-<img width="578" height="176" alt="image" src="https://github.com/user-attachments/assets/f1f32327-8f52-4fce-95ec-1fdae7183412" />
+2. **Acción si NO hay sesión:**
+```php
+   return redirect('/');
+```
+   - Si no encuentra `player_id` en la sesión, redirige al usuario a la página principal
+   - Esto impide el acceso a la ruta protegida
 
-Propósito:
+3. **Acción si SÍ hay sesión:**
+```php
+   return $next($request);
+```
+   - Si encuentra `player_id`, permite que la petición continúe normalmente
+   - El usuario puede acceder a la ruta solicitada
 
-        ◦ Define el documento como HTML5 en español
-        ◦ Configura la codificación de caracteres y la vista para dispositivos móviles
-        ◦ Establece el título de la página
-        ◦ Incluye jQuery para simplificar las operaciones complejas como el manejo de eventos (click) y las peticiones AJAX al servidor. 
+## ¿Qué es un Middleware?
 
-2. Estilos CSS
-   
-	Estilos Principales:
-            ▪ Body: Elimina márgenes predeterminados y ocupa toda la altura de la ventana
-            ▪ #alphabet-sidebar:
-            ▪ Contenedor fijo en el lado izquierdo de la pantalla
-            ▪ Centrado verticalmente usando transform: translateY(-50%)
-            ▪ Usa CSS Grid para organizar las letras en 4 columnas
-            ▪ .key-container:
-            ▪ Contenedores cuadrados de 60x60px para cada letra
-            ▪ Efectos de hover y estados deshabilitados
-            ▪ .key-image: Imágenes que ocupan todo el espacio del contenedor
-            ▪ #result-display: Área en la esquina superior derecha para mostrar resultados
+Un middleware es como un filtro o punto de control que se ejecuta **antes** de que la petición llegue al controlador. Piensa en ello como la seguridad de un edificio que verifica tu identificación antes de dejarte entrar.
 
-4. Estructura HTML con Blade
-   
-	Generación Dinámica del Abecedario:
+## Cómo Registrar este Middleware
 
-<img width="552" height="128" alt="image" src="https://github.com/user-attachments/assets/bb2aef2e-b0a0-4729-a4ab-5a5347dae4b2" />
+### 1. En `app/Http/Kernel.php`
 
+Añádelo a los middlewares de ruta:
+```php
+protected $routeMiddleware = [
+    // ... otros middlewares
+    'player.session' => \App\Http\Middleware\CheckPlayerSession::class,
+];
+```
 
-Características Especiales:
-            ▪ La letra 'Y' tiene un tratamiento especial, usando 'igriega' como nombre de archivo
-            ▪ Cada letra tiene dos imágenes asociadas:
-            ▪ Imagen normal: img/letras/[letra].png
-            ▪ Imagen tachada: img/letras_tachadas/[letra]_tachada.png
-4. Lógica JavaScript/jQuery
-		Configuración de Seguridad:
+### 2. Aplicarlo a Rutas Específicas
 
-    <img width="471" height="132" alt="image" src="https://github.com/user-attachments/assets/24182776-67f0-4160-b014-702d6939eb55" />
+**Opción A - Ruta individual:**
+```php
+Route::get('/jugar', [GameController::class, 'index'])
+    ->middleware('player.session');
+```
 
-Importancia: Protege contra ataques CSRF (Cross-Site Request Forgery) 						requerido por Laravel.
-		Funcionalidad Principal:
-                    1. Evento Click: Detecta clics en los contenedores de letras, dentro de la barra lateral. 
-                    2. Validación: Verifica si la letra ya fue seleccionada (clase 'disabled')
-                    3. Cambio Visual:
-                    ◦ Añade clase 'disabled' al contenedor
-                    ◦ Cambia la imagen a la versión tachada
-			4. Comunicación con Servidor:
-            
-                • Envía la letra seleccionada via AJAX POST a la ruta panel.check
-                • Maneja respuestas exitosas y errores
-                
-5. Flujo de Interacción del Usuario
-   
-            1. Selección de Letra: Usuario hace clic en cualquier letra del panel lateral
-            2. Feedback Visual Inmediato:
-                    ▪ La letra se marca como usada (opacidad reducida)
-                    ▪ La imagen cambia a versión tachada
-                    ▪ El cursor cambia a "no permitido"
-            3.	Procesamiento en Servidor:
-                    ▪ La letra se envía al backend para determinar si es vocal o consonante
-            4.	Resultado:
-                ▪ Se muestra el resultado en el área de mensajes
-                ▪ En caso de error, se muestra mensaje de error
-7. Dependencias y Requisitos
-8. 
-	Archivos de Imágenes Requeridos:
+**Opción B - Grupo de rutas:**
+```php
+Route::middleware(['player.session'])->group(function () {
+    Route::get('/jugar', [GameController::class, 'index']);
+    Route::get('/perfil', [ProfileController::class, 'show']);
+    Route::get('/ranking', [RankingController::class, 'index']);
+});
+```
 
-<img width="476" height="168" alt="image" src="https://github.com/user-attachments/assets/913f63c9-c9eb-4fa9-9db7-a14c9079df7e" />
+**Opción C - En el constructor del controlador:**
+```php
+class GameController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('player.session');
+    }
+}
+```
 
-Rutas Laravel Necesarias:
+## Ejemplo de Flujo Completo
 
-		route('panel.check'): Ruta POST que procesa la validación de letras
-        
-7. Consideraciones de Diseño Responsive
-   
-        ◦ Posicionamiento Fijo: El panel de letras permanece visible mientras se desplaza
-        ◦ Centrado Vertical: Se adapta a diferentes alturas de pantalla
-        ◦ Tamaños Fijos: Las teclas mantienen dimensiones consistentes
+### Usuario CON sesión activa:
+```
+1. Usuario intenta acceder a /jugar
+2. Middleware verifica sesión → ✓ Existe player_id
+3. Permite el acceso → Usuario ve la página de juego
+```
 
-panelController.php
+### Usuario SIN sesión activa:
+```
+1. Usuario intenta acceder a /jugar
+2. Middleware verifica sesión → ✗ NO existe player_id
+3. Redirige a / → Usuario ve la página principal
+```
 
-Estructura del Controlador
-1. Namespace e Imports
+## Variable de Sesión Requerida
+
+Este middleware espera encontrar en la sesión:
+```php
+session()->put('player_id', 123); // Se establece al hacer login
+```
+
+Ejemplo de dónde se podría establecer esta variable:
+```php
+// En un LoginController o similar
+public function login(Request $request)
+{
+    // ... validar credenciales ...
+    
+    session()->put('player_id', $player->id);
+    
+    return redirect('/jugar');
+}
+```
+
+## Posibles Mejoras
+
+- Añadir un mensaje flash informando por qué fue redirigido
+- Guardar la URL intentada para redirigir después del login
+- Verificar también que el jugador existe en la base de datos
+- Añadir logs para rastrear intentos de acceso no autorizados
+
+### Ejemplo con Mensaje Flash:
+```php
+public function handle(Request $request, Closure $next)
+{
+    if (!session()->has('player_id')) {
+        return redirect('/')
+            ->with('error', 'Debes iniciar sesión para acceder a esta página');
+    }
+    return $next($request);
+}
+```
+# Documentación del Middleware CheckPlayerSession
+
+## Descripción
+Middleware que verifica si existe una sesión activa de jugador antes de permitir el acceso a una ruta. Si no existe sesión, redirige a la página principal.
+
+## Namespace
+```php
+namespace App\Http\Middleware;
+```
+
+## Dependencias
+- `Closure`: Representa la siguiente acción en la cadena de middlewares
+- `Illuminate\Http\Request`: Contiene la información de la petición HTTP
+
+## Método handle()
+
+### Parámetros
+- `$request` (Request): La petición HTTP actual
+- `$next` (Closure): La siguiente operación a ejecutar
+
+### Funcionamiento
+
+1. **Verifica la sesión:**
+```php
+   if (!session()->has('player_id'))
+```
+   Comprueba si existe la variable `player_id` en la sesión
+
+2. **Sin sesión:**
+```php
+   return redirect('/');
+```
+   Redirige a la página principal si no hay sesión
+
+3. **Con sesión:**
+```php
+   return $next($request);
+```
+   Permite continuar con la petición si existe sesión
+
+### Retorna
+- Redirección a `/` si no hay sesión activa
+- Continuación de la petición si hay sesión activa
+
+## Variable de Sesión Requerida
+- `player_id`: Identificador del jugador en sesión
+
+# Documentación de ProfileUpdateRequest
+
+## Descripción
+Clase de validación para actualizar el perfil de usuario. Define las reglas que deben cumplir los datos del formulario.
+
+## Namespace
+```php
+namespace App\Http\Requests;
+```
+
+## Dependencias
+- `App\Models\User`: Modelo de usuario
+- `Illuminate\Foundation\Http\FormRequest`: Clase base para validación de formularios
+- `Illuminate\Validation\Rule`: Generador de reglas de validación
+
+## Método rules()
+
+### Retorna
+Array con las reglas de validación para los campos del formulario
+
+### Reglas de Validación
+
+**Campo `name`:**
+- `required`: Obligatorio
+- `string`: Debe ser texto
+- `max:255`: Máximo 255 caracteres
+
+**Campo `email`:**
+- `required`: Obligatorio
+- `string`: Debe ser texto
+- `lowercase`: Convertido a minúsculas
+- `email`: Formato de email válido
+- `max:255`: Máximo 255 caracteres
+- `Rule::unique(User::class)->ignore($this->user()->id)`: Debe ser único en la tabla de usuarios, excepto el email del usuario actual
 
 
 
