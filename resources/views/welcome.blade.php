@@ -56,6 +56,9 @@
                 <input type="hidden" name="idavatar" id="idavatar" value="1">
             </form> 
         </div> 
+        <div id="demogorgon-wrapper">
+        <img src="{{ asset('img/demogorgon-boton.png') }}" id="demogorgon-image" alt="Demogorgon abrazando botón">
+        </div>
     </div>
 
     <div id="crack"></div>
@@ -91,7 +94,7 @@
     let currentAvatarIndex = 0; 
 
     function updateAvatarDisplay() {
-        const offset = -currentAvatarIndex * 175; 
+        const offset = -currentAvatarIndex * 230; 
         avatarDisplay.style.transform = `translateY(${offset}px)`;
 
         const selectedId = avatarImages[currentAvatarIndex].getAttribute('data-avatar-id');

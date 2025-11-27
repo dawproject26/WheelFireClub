@@ -185,7 +185,6 @@ body{
     transform: translate(-50%, -50%);
     display: flex; 
     z-index: 7;
-    max-width: 90%; 
 }
 
 /* El formulario en sí solo maneja la disposición interna de los elementos */
@@ -206,13 +205,28 @@ body{
     background: rgba(0, 0, 0, 0.7);
     border: 3px solid #e20000;
     border-radius: 10px;
-    top: 45.5%;
-    left: 63%;
+    top: 51.4%;
+    left: 68%;
     z-index: 8;
+    height: 90px;
+    width: 460px;
+    font-size: 2em;
+    font-weight: bold;
 }
 
 #botonjugar_login:hover, #botonjugar_register:hover {
     box-shadow: 0 0 20px #e20000;
+}
+
+#demogorgon-wrapper{
+    position: absolute; 
+    z-index: 15; 
+    pointer-events: none;
+    width: 20px; 
+    height: auto;
+    top: 60%;   
+    left: 55%;  
+    transform: translate(-50%, -50%); 
 }
 
 /* Estilo del Cuadro de Texto (Aplica a los nuevos IDs) */
@@ -222,10 +236,11 @@ body{
     border-radius: 10px;
     padding: 15px 30px; 
     color: #e20000;
-    font-size: 1.2em;
+    font-size: 2em;
     position: absolute;
-    top: 45%;
-    left: 43%;
+    top: 51%;
+    left: 12%;
+    height: 50px;
 }
 
 /* Selector específico para asegurar que el placeholder sea visible y rojo */
@@ -237,8 +252,8 @@ body{
 /* Estilos para el contenedor del selector de avatar */
 .avatar-selector {
     position: absolute;
-    width: 175px; 
-    height: 175px; 
+    width: 230px; 
+    height: 230px; 
     border: 3px solid #e20000; 
     border-radius: 50%; 
     overflow: hidden; 
@@ -248,8 +263,8 @@ body{
     transition: box-shadow 0.3s ease; 
     
     /* Posicionamiento del avatar */
-    top: 48%;
-    left: 34%;
+    top: 33%;
+    left: 25%;
     transform: translate(-50%, -50%);
     z-index: 10;
 }
@@ -269,7 +284,7 @@ body{
 /* Estilos de las imágenes de avatar */
 .avatar-display img {
     width: 100%; 
-    height: 175px; 
+    height: 230px; 
     object-fit: cover; 
     display: block; 
 }
