@@ -1,9 +1,36 @@
-/* Estilos generales */
-.scene-container {
-    position: relative;
+/*
+ * -----------------------------------------------------
+ * 1. RESETS Y ANTI-SCROLL (CLAVE)
+ * -----------------------------------------------------
+ */
+
+html, body {
+    /* Eliminación de márgenes/rellenos por defecto que causan huecos */
+    margin: 0;
+    padding: 0;
+    
+    /* Configuración del body para ocupar toda la ventana visible */
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
+    
+    /* ¡CLAVE! Esto previene la aparición de las barras de desplazamiento */
+    overflow: hidden; 
+}
+
+body{
+    background-color: black;
+}
+
+.scene-container {
+    /* Usamos 'fixed' para un anclaje absoluto y robusto al viewport */
+    position: fixed; 
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden; /* Seguridad adicional */
+    transform: translateZ(0); 
+    will-change: transform;
 }
  
 .world {
@@ -23,19 +50,90 @@
     background-size: cover;
     background-position: center;
     pointer-events: none;
-    z-index: 5; /* Asegura que la grieta está por encima de los mundos */
+    z-index: 5;
+    transform: translateZ(0); 
+    will-change: transform;
    
-    /* === CLAVE: Inicialmente, la grieta es muy estrecha === */
-    clip-path: polygon(48% 0, 52% 0, 52% 100%, 48% 100%);
+    /* === AJUSTE CLAVE AQUÍ === */
+    /* Inicialmente, la grieta es muy estrecha, con un pequeño 'fade' en los bordes */
+    /* Usaremos rgba para que el borde del clip-path pueda ser "suave" si la imagen lo permite */
+    clip-path: polygon(
+        calc(50% - 2%) 0%,   /* Izquierda, arriba: un poco más abierto de lo que parece */
+        calc(50% + 2%) 0%,   /* Derecha, arriba */
+        calc(50% + 2%) 100%, /* Derecha, abajo */
+        calc(50% - 2%) 100%  /* Izquierda, abajo */
+    );
     transition: clip-path 1.5s ease-in-out;
 }
  
 /* El Mundo del Revés está oculto al inicio */
 #upside-down {
     opacity: 0;
+    z-index: 5;
 }
  
-/* Estilos para el botón */
+/*
+ * -----------------------------------------------------
+ * 3. ESTILOS DE TEXTO Y FUENTES (CORREGIDOS PARA EFECTO STRANGER THINGS EN EL TÍTULO)
+ * -----------------------------------------------------
+ */
+
+.stranger-things-text {
+    font-family: 'ITC Benguiat', serif;
+    color: #e20000; /* Color base de las letras */
+    /* Otros elementos con esta clase mantendrán este color base, 
+       pero el título tendrá su propio text-shadow específico. */
+}
+ 
+/* Nuevo estilo para el Título Centrado */
+.centered-title {
+    position: absolute;
+    left: 52%; /* Centra en el medio de la pantalla */
+    top: 25%; 
+    transform: translate(-50%, -50%); 
+    z-index: 10;
+    font-size: 5em; 
+    padding: 20px;
+    border-radius: 10px;
+    /* Necesitas que el contenedor use flex o text-align para centrar */
+    text-align: center;
+}
+
+/* Nuevo estilo para las líneas del título */
+.centered-title .title-line {
+    /* Fuerza un salto de línea después de cada palabra (WHEELFIRE y CLUB) */
+    display: block; 
+    /* Ajusta el tamaño de la segunda línea si es necesario, 
+       pero mantendremos 5em para que 'CLUB' sea más grande que en el logo original */
+    color: black;
+}
+
+
+/* === ¡CLAVE! EFECTO HUECO Y STRANGER THINGS EN EL TÍTULO === */
+.centered-title .stranger-things-text {
+    /* 1. EFECTO HUECO (Text Stroke) */
+    color: black; /* Hace que el relleno de la letra sea transparente */
+    
+    /* Crea el contorno de la letra (propiedad no estándar, usa prefijos) */
+    -webkit-text-stroke-width: 0.01em; /* Ancho del contorno */
+    -webkit-text-stroke-color: #ce0000; /* Color del contorno (rojo oscuro) */
+    -webkit-text-stroke-width: 0.01em; 
+    -webkit-text-stroke-color: #ce0000;
+
+    /* 2. EFECTO NEÓN (Resplandor) */
+   text-shadow: 
+        0 0 5px #ff0000,    /* Sombra más intensa */
+        0 0 15px #ff0000;   /* Resplandor más suave */
+}
+
+
+/*
+ * -----------------------------------------------------
+ * 4. BOTONES DE LA PANTALLA PRINCIPAL
+ * -----------------------------------------------------
+ */
+ 
+/* Estilos para el botón INICIAR SESIÓN */
 .centered-button {
     position: absolute;
     top: 50%;
@@ -46,55 +144,175 @@
     background: rgba(0, 0, 0, 0.7);
     border: 3px solid #e20000;
     border-radius: 10px;
-    z-index: 10; /* Asegura que el botón está por encima de todo */
+    z-index: 10;
 }
 
 .centered-button:hover {
-    box-shadow: 0 0 20px #e20000; /* Más brillo al pasar el ratón */
+    box-shadow: 0 0 20px #e20000;
 }
  
+/* Estilos para el botón REGISTRARSE */
 .centered-button2 {
     position: absolute;
     top: 50%;
-    right: 15%;
-    transform: translate(-50%, -50%);
+    right: 15%; 
+    transform: translate(-50%, -50%); 
     cursor: pointer;
     padding: 15px 30px;
     background: rgba(0, 0, 0, 0.7);
     border: 3px solid #e20000;
     border-radius: 10px;
-    z-index: 10; /* Asegura que el botón está por encima de todo */
+    z-index: 10;
 }
 
 .centered-button2:hover {
-    box-shadow: 0 0 20px #e20000; /* Más brillo al pasar el ratón */
+    box-shadow: 0 0 20px #e20000;
 }
 
-.stranger-things-text {
-    /* Aquí usarías tu fuente ITC Benguiat y el efecto neón */
-    font-family: 'ITC Benguiat', serif;
-    color: #e20000;
-    text-shadow: 0 0 10px #e20000;
+/*
+ * -----------------------------------------------------
+ * 5. ESTILOS DEL MUNDO DEL REVÉS (Formulario y Avatar) - Adaptado a nuevos IDs
+ * -----------------------------------------------------
+ */
+
+/* Nuevo estilo para centrar el contenedor de formularios (form-wrapper) */
+.form-wrapper {
+    position: absolute;
+    top: 55%; 
+    left: 55%; 
+    transform: translate(-50%, -50%);
+    display: flex; 
+    z-index: 7;
 }
- 
-/* --- DECLARACIÓN DE IMÁGENES (CONSOLIDADA) --- */
+
+/* El formulario en sí solo maneja la disposición interna de los elementos */
+.form-wrapper form {
+    position: static; 
+    transform: none; 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; 
+}
+
+/* Estilo para los botones JUGAR/REGISTRAR (Aplica a los nuevos IDs) */
+#botonjugar_login, #botonjugar_register {
+    position: absolute; 
+    transform: none; 
+    cursor: pointer;
+    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #e20000;
+    border-radius: 10px;
+    top: 50.4%;
+    left: 68%;
+    z-index: 8;
+    height: 90px;
+    width: 460px;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+#botonjugar_login:hover, #botonjugar_register:hover {
+    box-shadow: 0 0 20px #e20000;
+}
+
+#demogorgon-wrapper{
+    position: absolute; 
+    z-index: 15; 
+    pointer-events: none;
+    width: 20px; 
+    height: auto;
+    top: 57.3%;   
+    left: 56%;  
+    transform: translate(-50%, -50%); 
+}
+
+/* Estilo del Cuadro de Texto (Aplica a los nuevos IDs) */
+#cuadrotexto_login, #cuadrotexto_register {
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #e20000;
+    border-radius: 10px;
+    padding: 15px 30px; 
+    color: #e20000;
+    font-size: 2em;
+    position: absolute;
+    top: 51%;
+    left: 13.5%;
+    height: 50px;
+}
+
+/* Selector específico para asegurar que el placeholder sea visible y rojo */
+#cuadrotexto_login::placeholder, #cuadrotexto_register::placeholder {
+    color: #e20000;
+    opacity: 0.7; 
+}
+
+/* Estilos para el contenedor del selector de avatar */
+.avatar-selector {
+    position: absolute;
+    width: 230px; 
+    height: 230px; 
+    border: 3px solid #e20000; 
+    border-radius: 50%; 
+    overflow: hidden; 
+    cursor: pointer; 
+    background: rgba(0, 0, 0, 0.7); 
+    box-shadow: 0 0 10px #e20000; 
+    transition: box-shadow 0.3s ease; 
+    transform: translateZ(0); 
+    will-change: transform;
+    
+    /* Posicionamiento del avatar */
+    top: 37%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+.avatar-selector:hover {
+    box-shadow: 0 0 20px #e20000;
+}
+
+/* Contenedor de las imágenes de avatar (el que rotará) */
+.avatar-display {
+    display: flex;
+    flex-direction: column; 
+    width: 100%;
+    will-change: transform;
+    transition: transform 0.5s ease-in-out; 
+}
+
+/* Estilos de las imágenes de avatar */
+.avatar-display img {
+    width: 100%; 
+    height: 230px; 
+    object-fit: cover; 
+    display: block; 
+}
+
+/*
+ * -----------------------------------------------------
+ * 6. DECLARACIÓN DE IMÁGENES
+ * -----------------------------------------------------
+ */
 #mundo-real {
-    /* Ruta corregida: asumiendo que "img" es la carpeta y el CSS está fuera */
     background-image: url("../img/view1.png");
 }
  
 #upside-down {
-    /* Ruta corregida: asumiendo que "img" es la carpeta y el CSS está fuera */
     background-image: url("../img/view2.png");
 }
  
 #crack {
-    /* Ruta corregida: asumiendo que "img" es la carpeta y el CSS está fuera */
     background-image: url("../img/grieta_sola.png");
 }
  
  
-/* === Estado de Apertura: Lo que ocurre al añadir la clase 'open' al contenedor === */
+/*
+ * -----------------------------------------------------
+ * 7. ESTADO DE APERTURA (Al añadir la clase 'open')
+ * -----------------------------------------------------
+ */
 .scene-container.open #crack {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
@@ -107,115 +325,31 @@
     opacity: 1;
 }
  
-.scene-container.open #open-gate-button {
+.scene-container.open #login-button,
+.scene-container.open #register-button {
     opacity: 0;
     pointer-events: none;
 }
 
-/* Nuevo estilo para el Título Centrado */
-.centered-title {
+/*
+ * -----------------------------------------------------
+ * 8. BOTÓN RANKING
+ * -----------------------------------------------------
+ */
+
+.ranking-top-right {
     position: absolute;
-    /* Centra horizontalmente */
-    left: 52%;
-    /* Ajusta la posición vertical (e.g., al 15% de la altura de la pantalla) */
-    top: 25%; 
-    /* Mueve el elemento 50% de su propio ancho/alto hacia arriba/izquierda para centrarlo */
-    transform: translate(-50%, -50%); 
-    z-index: 10;
-    
-    /* Estilo adicional para que se vea como un título grande */
-    font-size: 5em; /* Puedes ajustar el tamaño */
-    padding: 20px;
-    border-radius: 10px;
-}
-
-/* El texto del título usa la clase existente */
-.centered-title .stranger-things-text {
-    text-shadow: 0 0 10px #000000, 0 0 20px #000000; 
-}
-
-/* Estilo del Formulario: Centra el contenedor y usa Flexbox */
-#upside-down form {
-    /* Elimina el posicionamiento del botón y lo aplica al formulario */
-    position: absolute;
-    top: 50%;
-    left: 55%;
-    transform: translate(-50%, -50%); /* Centra el formulario completo */
-    display: flex; /* Coloca los elementos uno al lado del otro */
-    align-items: center; /* Alineación vertical */
-    gap: 20px; /* Espacio entre el input y el botón */
-    z-index: 10;
-}
-
-/* Modificación de #botonjugar: Debe ser estático ahora */
-#botonjugar{
-    /* Quitar el posicionamiento absoluto que ya no es necesario */
-    position: static; 
-    transform: none; 
+    top: 68%;
+    left: 48.5%;
+    transform: none; /* Elimina la traducción que lo movía */
     cursor: pointer;
     padding: 15px 30px;
     background: rgba(0, 0, 0, 0.7);
     border: 3px solid #e20000;
     border-radius: 10px;
+    z-index: 10;
 }
-
-#botonjugar:hover {
-    box-shadow: 0 0 20px #e20000; /* Más brillo al pasar el ratón */
-}
-
-/* Estilo del Cuadro de Texto */
-#cuadrotexto{
-    /* Fondo semi-transparente y borde del botón */
-    background: rgba(0, 0, 0, 0.7);
-    border: 3px solid #e20000;
-    border-radius: 10px;
-    padding: 15px 30px; /* Mismo padding para que el alto sea igual */
-    
-    /* Color del texto (coincide con el neón rojo) */
-    color: #e20000;
-    
-    /* Ajuste para que el texto del placeholder también sea rojo */
-    font-size: 1.2em; /* Haz la fuente legible */
-}
-
-/* Selector específico para asegurar que el placeholder sea visible y rojo */
-#cuadrotexto::placeholder {
-    color: #e20000;
-    opacity: 0.7; /* Ligeramente más tenue que el texto escrito */
-}
-
-/* Estilos para el contenedor del selector de avatar */
-.avatar-selector {
-    width: 175px; /* Ancho fijo para el área visible del avatar */
-    height: 175px; /* Alto fijo para el área visible del avatar */
-    border: 3px solid #e20000; /* Borde rojo como los otros elementos */
-    border-radius: 50%; /* Hace que el selector sea redondo */
-    overflow: hidden; /* Oculta las partes de las imágenes que están fuera del círculo */
-    position: relative; /* Para posicionar el display de avatares dentro */
-    cursor: pointer; /* Indica que es clickeable */
-    background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
-    box-shadow: 0 0 10px #e20000; /* Efecto neón suave */
-    transition: box-shadow 0.3s ease; /* Transición para el brillo al pasar el ratón */
-    top: 40%;
-    left: 32.5%;
-}
-
-.avatar-selector:hover {
-    box-shadow: 0 0 20px #e20000; /* Más brillo al pasar el ratón */
-}
-
-/* Contenedor de las imágenes de avatar (el que rotará) */
-.avatar-display {
-    display: flex;
-    flex-direction: column; /* Coloca las imágenes una encima de otra */
-    width: 100%;
-    transition: transform 0.5s ease-in-out; /* Animación de la rotación */
-}
-
-/* Estilos de las imágenes de avatar */
-.avatar-display img {
-    width: 100%; /* Las imágenes ocupan todo el ancho del selector */
-    height: 175px; /* Ajusta el alto para que encajen */
-    object-fit: cover; /* Recorta la imagen si es necesario para que encaje */
-    display: block; /* Elimina espacio extra debajo de las imágenes */
+ 
+.ranking-top-right:hover {
+    box-shadow: 0 0 20px #e20000; 
 }

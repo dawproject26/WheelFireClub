@@ -3,71 +3,70 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
-use App\Models\Panel;
 use Illuminate\Http\Request;
 
 class ScoreController extends Controller
 {
+    /**
+     * Actualiza puntuación cuando se acierta una letra
+     */
     public function letter(Request $request)
     {
-        $letter = strtoupper($request->letter);
-        $panel = Panel::with('phrases')->findOrFail($request->panel_id);
-        $player = Player::findOrFail($request->player_id);
-
-        $found = [];
-
-        foreach ($panel->phrases as $idx => $phrase) {
-            $positions = [];
-
-            for ($i = 0; $i < strlen($phrase->phrase); $i++) {
-                if ($phrase->phrase[$i] === $letter) {
-                    $positions[] = $i;
-                }
-            }
-
-            if(count($positions)){
-                $player->score->score += count($positions) * 10;
-                $player->score->save();
-            }
-
-            $found[] = [
-                'phrase' => $phrase->phrase,
-                'positions' => $positions
-            ];
+        // Obtener el ID del jugador desde la sesión
+        $playerId = session('player_id');
+        
+        if (!$playerId) {
+            return response()->json(['error' => 'No hay sesión'], 401);
         }
 
+        // Buscar el jugador con su score
+        $player = Player::with('score')->find($playerId);
+        
+        if (!$player || !$player->score) {
+            return response()->json(['error' => 'Jugador no encontrado'], 404);
+        }
+
+        // Recibir los puntos del request (por defecto +10 por letra acertada)
+        $puntos = $request->input('puntos', 10);
+        
+        // Actualizar el score
+        $player->score->score += $puntos;
+        $player->score->save();
+
         return response()->json([
-            'found' => $found,
+            'success' => true,
             'score' => $player->score->score
         ]);
     }
 
+    /**
+     * Actualiza puntuación cuando se adivina la frase completa
+     */
     public function guess(Request $request)
     {
-        $guess = strtoupper($request->guess);
-
-        $panel = Panel::with('phrases')->findOrFail($request->panel_id);
-        $player = Player::findOrFail($request->player_id);
-
-        $correct = false;
-
-        foreach ($panel->phrases as $phrase) {
-            if (trim($phrase->phrase) === trim($guess)) {
-                $correct = true;
-            }
+        // Obtener el ID del jugador desde la sesión
+        $playerId = session('player_id');
+        
+        if (!$playerId) {
+            return response()->json(['error' => 'No hay sesión'], 401);
         }
 
-        if ($correct) {
-            $player->score->score += 100;
-        } else {
-            $player->score->score = max(0, $player->score->score - 10);
+        // Buscar el jugador con su score
+        $player = Player::with('score')->find($playerId);
+        
+        if (!$player || !$player->score) {
+            return response()->json(['error' => 'Jugador no encontrado'], 404);
         }
 
+        // Bonus por victoria: +100 puntos
+        $player->score->score += 100;
         $player->score->save();
 
         return response()->json([
-            'result' => $correct ? 'correct' : 'wrong',
-            'score' => $player->score->score
+            'success' => true,
+            'score' => $player->score->score,
+            'result' => 'correct',
+            'message' => '¡Victoria! +100 puntos'
         ]);
     }
 }

@@ -10,6 +10,11 @@
 </head>
 <body>
 
+   <audio loop muted id="background-music" preload="auto">
+        <source src="{{ asset('audio/music.mp3') }}" type="audio/mpeg">
+        <source src="{{ asset('audio/music.ogg') }}" type="audio/ogg">
+    </audio>
+
     <div class="layout-container">
         
         <div class="header">
@@ -23,11 +28,15 @@
                     @php
                         $baseFileName = strtolower($letter);
                         if ($letter === 'Y') $baseFileName = 'igriega';
+                        
+                        $normalImg = asset('img/letras/' . $baseFileName . '.png');
+                        $tachedImg = asset('img/letras_tachadas/' . $baseFileName . '_tachada.png');
                     @endphp
                     <div class="key-container" data-letter="{{ $letter }}" onclick="seleccionarLetra('{{ $letter }}')">
                         <img id="img-{{ $letter }}"
                              class="key-image"
-                             src="{{ asset('img/letras/' . $baseFileName . '.png') }}"
+                             src="{{ $normalImg }}"
+                             data-tached-src="{{ $tachedImg }}"
                              alt="{{ $letter }}"
                              onerror="this.style.display='none'; this.parentElement.innerText='{{ $letter }}'">
                     </div>
@@ -36,14 +45,11 @@
         </div>
 
         <div class="center-panel">
-            
             <div class="board-section">
-                <div id="frase-container">
-                    </div>
+                <div id="frase-container"></div>
             </div>
 
             <div class="play-zone">
-                
                 <div class="player-block">
                     @php
                         $avatars = [1 => 'img/eleven.png', 2 => 'img/mike.png', 3 => 'img/lucas.png', 4 => 'img/dustin.png', 5 => 'img/will.png'];
@@ -58,7 +64,7 @@
                     </div>
                     <div class="stat-box">
                         <span style="font-size:0.8rem; color:#aaa;">PUNTOS</span>
-                        <span class="stat-value" id="puntos-actuales">0</span>
+                        <span class="stat-value" id="puntos-actuales">{{ $score_inicial ?? 0 }}</span>
                     </div>
                 </div>
 
@@ -74,7 +80,6 @@
                         <button id="btnGirar">GIRAR RULETA</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -108,264 +113,223 @@
     <div id="result-display"></div>
 
     <script>
-        // ===== 1. VARIABLES GLOBALES =====
+        const csrf = document.querySelector('meta[name="csrf-token"]').content;
         let tiempoRestante = 180;
         let temporizadorInterval;
         let letrasUsadas = [];
         let opcionRuletaActual = null;
-        let anguloActual = 0; // Para movimiento acumulativo
+        let anguloActual = 0;
         let estaGirando = false;
         let juegoActivo = true;
-        let puntuacion = 0;
-
-        // Datos desde Laravel
+        let puntuacion = {{ $score_inicial ?? 0 }};
+        const backgroundMusic = document.getElementById('background-music');
         const fraseActual = "{{ Session::get('frase_actual', 'BOJACK HORSEMAN') }}";
-        
-        // Elementos DOM
         const ruleta = document.getElementById('ruleta');
         const btnGirar = document.getElementById('btnGirar');
         const displayResultado = document.getElementById('mensaje-ruleta');
         const temporizadorHTML = document.getElementById('temporizador');
-
-        // Configuración Ruleta (Ajustar orden según tu imagen)
         const TOTAL_SECTORES = 8;
         const GRADOS_POR_SECTOR = 360 / TOTAL_SECTORES;
-        const opcionesPorSector = [
-            "Demogorgon", "Consonante", "Eleven", "Vocal", 
-            "Vecna", "Consonante", "Demoperro", "Vocal"
-        ];
+        const opcionesPorSector = ["Demogorgon", "Consonante", "Eleven", "Vocal", "Vecna", "Consonante", "Demoperro", "Vocal"];
 
-        // ===== 2. INICIALIZACIÓN =====
         document.addEventListener('DOMContentLoaded', () => {
             actualizarFraseDisplay();
             iniciarTemporizador();
-            
             btnGirar.addEventListener('click', girarRuleta);
             document.getElementById('btnAdivinar').addEventListener('click', openGuessModal);
-            
-            // IMPORTANTE: Detecta fin de transición CSS
             ruleta.addEventListener('transitionend', finalizarGiro);
+            document.getElementById('puntos-actuales').textContent = puntuacion;
         });
 
-        // ===== 3. LÓGICA DE GIRO (ORIGINAL RESTAURADA) =====
+        function actualizarPuntuacion(puntos) {
+            puntuacion = Math.max(0, puntuacion + puntos);
+            document.getElementById('puntos-actuales').textContent = puntuacion;
+            fetch("{{ route('puntuacion.letra') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({ puntos: puntos })
+            }).then(resp => resp.json()).then(data => {
+                if (data.score !== undefined) {
+                    puntuacion = data.score;
+                    document.getElementById('puntos-actuales').textContent = data.score;
+                }
+            }).catch(err => console.error('Error score:', err));
+        }
+
+        // --- FUNCIONES VICTORIA / DERROTA CORREGIDAS ---
+
+        function mostrarVictoria() {
+            juegoActivo = false;
+            clearInterval(temporizadorInterval);
+            
+            fetch("{{ route('puntuacion.adivinar') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({ frase: fraseActual })
+            }).then(resp => resp.json()).then(data => {
+                if (data.score !== undefined) {
+                    puntuacion = data.score;
+                    document.getElementById('puntos-actuales').textContent = data.score;
+                }
+            }).catch(err => console.error('Error:', err));
+            
+            // MODAL FINAL PERSISTENTE
+            const el = document.getElementById('result-display');
+            el.innerHTML = `
+                <h1 style="color:#28a745; font-size:3rem; margin-bottom:20px;">🎉 ¡VICTORIA!</h1>
+                <p style="color:#ffd700; font-size:1.5rem; margin-bottom:30px;">+100 PUNTOS</p>
+                <button onclick="volverAlInicio()" style="padding:15px 40px; background:#28a745; color:#fff; border:2px solid #fff; font-weight:bold; cursor:pointer; font-size:1.3rem; border-radius:8px; font-family:'Courier New', monospace; text-transform:uppercase; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);">
+                    🏠 VOLVER A JUGAR
+                </button>
+            `;
+            el.style.display = 'flex'; // IMPORTANTE: Se queda visible
+            
+            bloquearJuego();
+        }
+
+        function terminarJuego(victoria) {
+            if (victoria) { mostrarVictoria(); return; }
+
+            juegoActivo = false;
+            clearInterval(temporizadorInterval);
+            
+            // MODAL FINAL PERSISTENTE
+            const el = document.getElementById('result-display');
+            el.innerHTML = `
+                <h1 style="color:#dc3545; font-size:3rem; margin-bottom:20px;">💀 GAME OVER</h1>
+                <p style="color:#aaa; font-size:1.2rem; margin-bottom:30px;">Has perdido esta partida</p>
+                <button onclick="volverAlInicio()" style="padding:15px 40px; background:#dc3545; color:#fff; border:2px solid #fff; font-weight:bold; cursor:pointer; font-size:1.3rem; border-radius:8px; font-family:'Courier New', monospace; text-transform:uppercase; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);">
+                    🏠 VOLVER A JUGAR
+                </button>
+            `;
+            el.style.display = 'flex'; // IMPORTANTE: Se queda visible
+            
+            bloquearJuego();
+        }
+
+        // Auxiliar para bloquear UI
+        function bloquearJuego() {
+            btnGirar.disabled = true;
+            document.querySelectorAll('.key-container').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.classList.add('disabled');
+            });
+            document.getElementById('btnAdivinar').disabled = true;
+            document.querySelector('.layout-container').style.filter = "grayscale(1) brightness(0.5)";
+            document.querySelector('.layout-container').style.pointerEvents = "none";
+            // Rehabilitamos puntero solo en el modal final
+            document.getElementById('result-display').style.pointerEvents = "auto";
+        }
+
+        // --- RESTO DE LÓGICA ---
+
         function girarRuleta() {
             if (estaGirando || !juegoActivo) return;
-
             estaGirando = true;
             btnGirar.disabled = true;
             displayResultado.textContent = "GIRANDO...";
             displayResultado.style.color = "#fff";
-
-            // Cálculo acumulativo para evitar "rebobinado"
-            const vueltasMinimas = 5;
-            const gradosAleatorios = Math.floor(Math.random() * 360);
-            const giroTotal = (vueltasMinimas * 360) + gradosAleatorios;
-            
-            anguloActual += giroTotal;
+            anguloActual += (5 * 360) + Math.floor(Math.random() * 360);
             ruleta.style.transform = `rotate(${anguloActual}deg)`;
         }
 
         function finalizarGiro() {
             estaGirando = false;
             btnGirar.disabled = false;
-
-            // Calcular sector ganador
             const gradosNorm = anguloActual % 360;
-            // Flecha abajo = 180 deg offset
-            const posicionFlecha = 180; 
-            let gradosResult = (360 - gradosNorm + posicionFlecha) % 360;
-            const indice = Math.floor(gradosResult / GRADOS_POR_SECTOR);
-            const opcion = opcionesPorSector[indice >= 0 ? indice : 0];
-
-            procesarResultado(opcion);
+            const indice = Math.floor(((360 - gradosNorm + 180) % 360) / GRADOS_POR_SECTOR);
+            procesarResultado(opcionesPorSector[indice >= 0 ? indice : 0]);
         }
 
         function procesarResultado(opcion) {
             opcionRuletaActual = null;
-            let msg = "";
-            let color = "#fff";
-
-            if (opcion === 'Vocal') {
-                opcionRuletaActual = 'VOCAL';
-                msg = "🗣 VOCAL";
-                color = "#ffd700"; // Oro
-            } else if (opcion === 'Consonante') {
-                opcionRuletaActual = 'CONSONANTE';
-                msg = "🔤 CONSONANTE";
-                color = "#00ffff"; // Cyan
-            } else if (opcion === 'Eleven') {
-                modificarTiempo(20);
-                msg = "🧇 ELEVEN (+20s)";
-                color = "#4CAF50"; // Verde
-                mostrarMensajeFlotante("🧇 ¡ELEVEN TE AYUDA!");
-            } else if (opcion === 'Vecna') {
-                // CORRECCIÓN ESPECÍFICA PARA VECNA
-                modificarTiempo(-20);
-                msg = "🕰 VECNA (-20s)";
-                color = "#ff0000"; // Rojo
-                mostrarMensajeFlotante("👹 ¡VECNA TE ENCONTRÓ!");
-            } else if (['Demogorgon', 'Demoperro'].includes(opcion)) {
-                const castigo = (opcion === 'Demogorgon') ? -10 : -5;
-                modificarTiempo(castigo);
-                msg = `👹 MONSTRUO (${castigo}s)`;
-                color = "#ff4444";
-                mostrarMensajeFlotante(`👹 ¡${opcion.toUpperCase()}!`);
+            let msg = "", color = "#fff";
+            if (opcion === 'Vocal') { opcionRuletaActual = 'VOCAL'; msg = "🗣 VOCAL"; color = "#ffd700"; }
+            else if (opcion === 'Consonante') { opcionRuletaActual = 'CONSONANTE'; msg = "🔤 CONSONANTE"; color = "#00ffff"; }
+            else if (opcion === 'Eleven') { modifyingTime(20); msg = "🧇 ELEVEN (+20s)"; color = "#4CAF50"; mostrarMensajeFlotante("🧇 ¡ELEVEN TE AYUDA!"); }
+            else if (opcion === 'Vecna') { modifyingTime(-20); msg = "🕰 VECNA (-20s)"; color = "#ff0000"; mostrarMensajeFlotante("👹 ¡VECNA TE ENCONTRÓ!"); }
+            else if (['Demogorgon', 'Demoperro'].includes(opcion)) { 
+                let t = (opcion === 'Demogorgon' ? -10 : -5); modifyingTime(t); msg = `👹 MONSTRUO (${t}s)`; color = "#ff4444"; mostrarMensajeFlotante(`👹 ¡${opcion}!`); 
             }
-
             displayResultado.textContent = msg;
             displayResultado.style.color = color;
-            
             actualizarTeclado();
         }
 
-        // ===== 4. LÓGICA DE JUEGO (LETRAS) =====
         function seleccionarLetra(letra) {
             if (!juegoActivo) return;
-
-            // Validaciones
             if (letrasUsadas.includes(letra)) return;
-            if (!opcionRuletaActual) {
-                mostrarMensajeFlotante("🎡 GIRA PRIMERO");
-                return;
-            }
+            if (!opcionRuletaActual) { mostrarMensajeFlotante("🎡 GIRA PRIMERO"); return; }
+            const esV = "AEIOU".includes(letra);
+            if (opcionRuletaActual === 'VOCAL' && !esV) { mostrarMensajeFlotante("❌ SOLO VOCALES"); return; }
+            if (opcionRuletaActual === 'CONSONANTE' && esV) { mostrarMensajeFlotante("❌ SOLO CONSONANTES"); return; }
 
-            const esVocal = "AEIOU".includes(letra);
-            if (opcionRuletaActual === 'VOCAL' && !esVocal) {
-                mostrarMensajeFlotante("❌ SOLO VOCALES");
-                return;
-            }
-            if (opcionRuletaActual === 'CONSONANTE' && esVocal) {
-                mostrarMensajeFlotante("❌ SOLO CONSONANTES");
-                return;
-            }
-
-            // Ejecutar jugada
             letrasUsadas.push(letra);
-            
-            // Deshabilitar tecla visualmente
-            const tecla = document.querySelector(`.key-container[data-letter="${letra}"]`);
-            if(tecla) tecla.classList.add('disabled');
+            const t = document.querySelector(`.key-container[data-letter="${letra}"]`);
+            if(t) { t.classList.add('disabled'); const i = t.querySelector('img'); if(i && i.dataset.tachedSrc) i.src = i.dataset.tachedSrc; }
 
             if (fraseActual.includes(letra)) {
                 revelarLetra(letra);
-                puntuacion += 10;
-                document.getElementById('puntos-actuales').innerText = puntuacion;
-                mostrarMensajeFlotante("✅ CORRECTO");
+                actualizarPuntuacion(10);
+                mostrarMensajeFlotante("✅ CORRECTO (+10pts)");
                 verificarVictoria();
             } else {
                 mostrarMensajeFlotante("❌ FALLO");
                 modificarTiempo(-5);
             }
-
-            // Reset turno
             opcionRuletaActual = null;
             displayResultado.textContent = "";
             actualizarTeclado();
         }
 
         function actualizarTeclado() {
-            document.querySelectorAll('.key-container').forEach(key => {
-                // Quitar animaciones previas
-                key.classList.remove('vocal-active', 'consonante-active');
-                
-                if (!key.classList.contains('disabled')) {
-                    const l = key.dataset.letter;
-                    const esVocal = "AEIOU".includes(l);
-
-                    // Aplicar animación fluida si corresponde
-                    if (opcionRuletaActual === 'VOCAL' && esVocal) {
-                        key.classList.add('vocal-active');
-                    } else if (opcionRuletaActual === 'CONSONANTE' && !esVocal) {
-                        key.classList.add('consonante-active');
-                    }
+            document.querySelectorAll('.key-container').forEach(k => {
+                k.classList.remove('vocal-active', 'consonante-active');
+                if (!k.classList.contains('disabled')) {
+                    const l = k.dataset.letter; const esV = "AEIOU".includes(l);
+                    if (opcionRuletaActual === 'VOCAL' && esV) k.classList.add('vocal-active');
+                    else if (opcionRuletaActual === 'CONSONANTE' && !esV) k.classList.add('consonante-active');
                 }
             });
         }
 
-        // ===== 5. UTILIDADES Y RENDER =====
         function actualizarFraseDisplay() {
-            const container = document.getElementById('frase-container');
-            container.innerHTML = '';
-            const palabras = fraseActual.toUpperCase().split(' ');
-
-            palabras.forEach(palabra => {
-                const divPalabra = document.createElement('div');
-                divPalabra.className = 'palabra';
-                
-                for (let letra of palabra) {
-                    if (!/[A-Z]/.test(letra)) continue;
-                    const divLetra = document.createElement('div');
-                    divLetra.className = 'letra';
-                    divLetra.dataset.letra = letra;
-                    divLetra.innerHTML = `<span class="letra-texto">${letra}</span>`;
-                    // Rotación sutil aleatoria
-                    divLetra.style.transform = `rotate(${Math.random() * 4 - 2}deg)`;
-                    divPalabra.appendChild(divLetra);
+            const c = document.getElementById('frase-container'); c.innerHTML = '';
+            fraseActual.toUpperCase().split(' ').forEach(palabra => {
+                const dP = document.createElement('div'); dP.className = 'palabra';
+                for (let l of palabra) {
+                    if (!/[A-Z]/.test(l)) continue;
+                    const dL = document.createElement('div'); dL.className = 'letra'; dL.dataset.letra = l;
+                    dL.innerHTML = `<span class="letra-texto">${l}</span>`;
+                    dP.appendChild(dL);
                 }
-                container.appendChild(divPalabra);
+                c.appendChild(dP);
             });
-            // Restaurar estado si recarga página
-            letrasUsadas.forEach(l => revelarLetra(l));
+            letrasUsadas.forEach(l => { revelarLetra(l); const t = document.querySelector(`.key-container[data-letter="${l}"]`); if(t){ t.classList.add('disabled'); const i = t.querySelector('img'); if(i && i.dataset.tachedSrc) i.src = i.dataset.tachedSrc; } });
         }
 
-        function revelarLetra(letra) {
-            document.querySelectorAll(`.letra[data-letra="${letra}"]`).forEach(el => {
-                el.classList.add('revelada');
-                // Quitar rotación al revelar para leer mejor
-                el.style.transform = 'rotate(0deg) scale(1.05)';
-            });
-        }
-
-        function verificarVictoria() {
-            if (document.querySelectorAll('.letra:not(.revelada)').length === 0) {
-                terminarJuego(true);
-            }
-        }
-
-        // ===== 6. TEMPORIZADOR Y MODALES =====
-        function iniciarTemporizador() {
-            actualizarTimerUI();
-            temporizadorInterval = setInterval(() => {
-                if (juegoActivo && tiempoRestante > 0) {
-                    tiempoRestante--;
-                    actualizarTimerUI();
-                } else if (tiempoRestante <= 0) {
-                    terminarJuego(false);
-                }
-            }, 1000);
-        }
-
-        function actualizarTimerUI() {
-            const m = Math.floor(tiempoRestante / 60).toString().padStart(2,'0');
-            const s = (tiempoRestante % 60).toString().padStart(2,'0');
-            temporizadorHTML.innerText = `${m}:${s}`;
-            
-            if (tiempoRestante < 30) temporizadorHTML.classList.add('danger');
-            else temporizadorHTML.classList.remove('danger');
-        }
-
-        function modificarTiempo(segundos) {
-            tiempoRestante += segundos;
-            if (tiempoRestante < 0) tiempoRestante = 0;
-            actualizarTimerUI();
-        }
-
-        function mostrarMensajeFlotante(texto) {
+        function revelarLetra(l) { document.querySelectorAll(`.letra[data-letra="${l}"]`).forEach(el => { el.classList.add('revelada'); el.style.transform = 'rotate(0deg) scale(1.05)'; }); }
+        function verificarVictoria() { if (document.querySelectorAll('.letra:not(.revelada)').length === 0) mostrarVictoria(); }
+        function iniciarTemporizador() { actualizarTimerUI(); temporizadorInterval = setInterval(() => { if (juegoActivo && tiempoRestante > 0) { tiempoRestante--; actualizarTimerUI(); } else if (tiempoRestante <= 0) terminarJuego(false); }, 1000); }
+        function actualizarTimerUI() { const m = Math.floor(tiempoRestante/60).toString().padStart(2,'0'), s = (tiempoRestante%60).toString().padStart(2,'0'); temporizadorHTML.innerText = `${m}:${s}`; temporizadorHTML.className = tiempoRestante < 30 ? 'danger' : ''; }
+        function modifyingTime(s) { tiempoRestante = Math.max(0, tiempoRestante + s); actualizarTimerUI(); }
+        
+        // Mensajes FLOTANTES (Temporales)
+        function mostrarMensajeFlotante(t) {
+            // No mostrar mensajes flotantes si el juego ha terminado
+            if (!juegoActivo) return; 
             const el = document.getElementById('result-display');
-            el.innerHTML = texto;
+            el.innerHTML = `<h2>${t}</h2>`;
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 1500);
+            setTimeout(() => { if(juegoActivo) el.style.display = 'none'; }, 1500);
         }
 
         function openGuessModal() { document.getElementById('guessModal').style.display = 'flex'; }
         function closeGuessModal() { document.getElementById('guessModal').style.display = 'none'; }
-
         function confirmGuess() {
-            const input = document.getElementById('guessInput');
-            if (input.value.toUpperCase().trim() === fraseActual) {
-                // Revelar todo
+            if (document.getElementById('guessInput').value.toUpperCase().trim() === fraseActual) {
                 document.querySelectorAll('.letra').forEach(el => el.classList.add('revelada'));
-                terminarJuego(true);
+                mostrarVictoria();
             } else {
                 mostrarMensajeFlotante("☠️ INCORRECTO");
                 setTimeout(() => terminarJuego(false), 1000);
@@ -373,23 +337,20 @@
             closeGuessModal();
         }
 
-        function terminarJuego(victoria) {
-            juegoActivo = false;
-            clearInterval(temporizadorInterval);
-            const msg = victoria ? "🎉 ¡VICTORIA!" : "💀 GAME OVER";
-            const color = victoria ? "#28a745" : "#dc3545";
-            
-            const el = document.getElementById('result-display');
-            el.innerHTML = `<h1 style="color:${color}; font-size:3rem;">${msg}</h1>`;
-            el.style.display = 'block';
-            
-            // Bloquear interfaz
-            document.querySelector('.layout-container').style.filter = "grayscale(1) brightness(0.5)";
-            document.querySelector('.layout-container').style.pointerEvents = "none";
-        }
-
         function resetGame() { if(confirm("¿Reiniciar?")) window.location.href = "{{ route('panel.reset') }}"; }
         function logout() { window.location.href = "{{ route('player.logout') }}"; }
+        
+        // Función Volver al Inicio
+        function volverAlInicio() { window.location.href = "{{ route('welcome') }}"; }
+
+        function enableAudioHandler() {
+            if (backgroundMusic) {
+                backgroundMusic.volume = 0.5; backgroundMusic.muted = false; 
+                backgroundMusic.play().catch(e => console.error("Audio error:", e));
+                document.removeEventListener('click', enableAudioHandler);
+            }
+        }
+        document.addEventListener('click', enableAudioHandler);
     </script>
 </body>
 </html>
