@@ -2474,8 +2474,150 @@ cache_locks (tabla independiente)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# Documentación de Rutas Web
 
+**Ruta:** `routes/web.php`
 
+## Descripción General
+Archivo de configuración de rutas web de Laravel para el sistema de juego con ruleta y paneles.
+
+## Controladores Utilizados
+
+| Controlador | Descripción |
+|-------------|-------------|
+| `PanelController` | Gestión del panel de juego |
+| `PlayerController` | Gestión de jugadores |
+| `RouletteController` | Gestión de la ruleta |
+| `ScoreController` | Gestión de puntuaciones |
+| `RankingController` | Gestión del ranking |
+
+---
+
+## Rutas Definidas
+
+### Ruta Principal
+
+#### `GET /` - Página de bienvenida
+- **Nombre:** `welcome`
+- **Vista:** `welcome`
+- **Descripción:** Página principal del sistema
+
+---
+
+### Rutas de Autenticación
+
+#### `POST /login` - Inicio de sesión de jugador
+- **Nombre:** `player.login`
+- **Controlador:** `PlayerController@login`
+
+#### `POST /register` - Registro de jugador
+- **Nombre:** `player.register`
+- **Controlador:** `PlayerController@register`
+
+#### `GET /logout` - Cierre de sesión
+- **Nombre:** `player.logout`
+- **Controlador:** `PlayerController@logout`
+
+---
+
+### Ruta de Ranking
+
+#### `GET /ranking` - Visualización del ranking
+- **Nombre:** `ranking.index`
+- **Controlador:** `RankingController@index`
+
+---
+
+### Rutas del Panel de Juego
+*Grupo de rutas con middleware `web`*
+
+#### `GET /panel` - Página principal del panel
+- **Nombre:** `panel.index`
+- **Controlador:** `PanelController@index`
+
+#### `GET /panel/temporizador` - Temporizador del panel
+- **Nombre:** `panel.temporizador`
+- **Controlador:** `PanelController@temporizador`
+
+#### `POST /panel/girar` - Acción de girar la ruleta
+- **Nombre:** `panel.girar`
+- **Controlador:** `PanelController@girar`
+
+#### `POST /panel/letra` - Envío de letra
+- **Nombre:** `panel.letra`
+- **Controlador:** `PanelController@letra`
+
+#### `POST /panel/check` - Verificación de letra
+- **Nombre:** `panel.check`
+- **Controlador:** `PanelController@checkLetter`
+
+#### `GET /panel/reset` - Reinicio del panel
+- **Nombre:** `panel.reset`
+- **Controlador:** `PanelController@reset`
+
+---
+
+### Rutas de la Ruleta
+
+#### `POST /ruleta/girar` - Girar la ruleta
+- **Nombre:** `ruleta.spin`
+- **Controlador:** `RouletteController@spin`
+
+#### `POST /ruleta/aplicar` - Aplicar resultado de la ruleta
+- **Nombre:** `ruleta.apply`
+- **Controlador:** `RouletteController@apply`
+
+---
+
+### Rutas de Puntuación
+
+#### `POST /puntuacion/letra` - Puntuación por letra
+- **Nombre:** `puntuacion.letra`
+- **Controlador:** `ScoreController@letter`
+
+#### `POST /puntuacion/adivinar` - Puntuación por adivinanza
+- **Nombre:** `puntuacion.guess`
+- **Controlador:** `ScoreController@guess`
+
+---
+
+## Middleware
+
+| Middleware | Aplicado a |
+|------------|------------|
+| `web` | Grupo de rutas del panel de juego |
+
+---
+
+## Resumen de Rutas por Método HTTP
+
+### GET
+- `/` - Página de bienvenida
+- `/logout` - Cierre de sesión
+- `/ranking` - Visualización del ranking
+- `/panel` - Página principal del panel
+- `/panel/temporizador` - Temporizador del panel
+- `/panel/reset` - Reinicio del panel
+
+### POST
+- `/login` - Inicio de sesión
+- `/register` - Registro de jugador
+- `/panel/girar` - Girar la ruleta desde el panel
+- `/panel/letra` - Envío de letra
+- `/panel/check` - Verificación de letra
+- `/ruleta/girar` - Girar la ruleta
+- `/ruleta/aplicar` - Aplicar resultado
+- `/puntuacion/letra` - Puntuación por letra
+- `/puntuacion/adivinar` - Puntuación por adivinanza
+
+---
+
+## Tecnología
+- **Framework:** Laravel
+- **Tipo:** Web Routes
+- **Namespace:** `Illuminate\Support\Facades\Route`
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 PANEL DEL ABECEDARIO Y SU LÓGICA
 
