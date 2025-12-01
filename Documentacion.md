@@ -2120,9 +2120,40 @@ La ruleta combina mecánicas tradicionales de juegos de palabras (como La Ruleta
 - VOCAL y CONSONANTE permiten al jugador avanzar en resolver palabras o frases
 - Los personajes probablemente activan eventos especiales, penalizaciones o bonificaciones temáticas de la serie
 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**Documentación de Migración de Cache**
+
+_Ruta: database/migrations/0001_01_01_000001_create_cache_table.php_
+
+**Descripción General**
+Migración anónima de Laravel que crea dos tablas para el sistema de caché y bloqueos de caché.
+
+Estructura de Tablas
+**Tabla**: cache
+Almacena los elementos del sistema de caché.
+
+**Columnas**:
+- key: Clave identificadora del elemento de caché (string, clave primaria)
+- value: Valor almacenado en caché (mediumText)
+- expiration: Timestamp de expiración del elemento (integer)
+
+**Tabla**: cache_locks
+Gestiona los bloqueos del sistema de caché.
+
+**Columnas**:
+- key: Clave identificadora del bloqueo (string, clave primaria)
+- owner: Propietario del bloqueo (string)
+- expiration: Timestamp de expiración del bloqueo (integer)
+
+**Métodos**
+**up()**
+Ejecuta las migraciones creando las dos tablas en la base de datos.
+**down()**
+Revierte las migraciones eliminando las dos tablas de la base de datos en el siguiente orden:
+- cache
+- cache_locks
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
