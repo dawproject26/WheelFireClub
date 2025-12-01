@@ -188,24 +188,35 @@
         }
 
         function terminarJuego(victoria) {
-            if (victoria) { mostrarVictoria(); return; }
+    if (victoria) { 
+        mostrarVictoria(); 
+        return; 
+    }
 
-            juegoActivo = false;
-            clearInterval(temporizadorInterval);
-            
-            // MODAL FINAL PERSISTENTE
-            const el = document.getElementById('result-display');
-            el.innerHTML = `
-                <h1 style="color:#dc3545; font-size:3rem; margin-bottom:20px;">💀 GAME OVER</h1>
-                <p style="color:#aaa; font-size:1.2rem; margin-bottom:30px;">Has perdido esta partida</p>
-                <button onclick="volverAlInicio()" style="padding:15px 40px; background:#dc3545; color:#fff; border:2px solid #fff; font-weight:bold; cursor:pointer; font-size:1.3rem; border-radius:8px; font-family:'Courier New', monospace; text-transform:uppercase; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);">
-                    🏠 VOLVER A JUGAR
-                </button>
-            `;
-            el.style.display = 'flex'; // IMPORTANTE: Se queda visible
-            
-            bloquearJuego();
-        }
+    juegoActivo = false;
+    clearInterval(temporizadorInterval);
+    
+    // MODAL FINAL PERSISTENTE - CON LA FRASE COMPLETA
+    const el = document.getElementById('result-display');
+    el.innerHTML = `
+        <h1 style="color:#dc3545; font-size:3rem; margin-bottom:20px;">💀 GAME OVER</h1>
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #dc3545;">
+            <p style="color:#ffd700; font-size:2rem; font-family: 'Courier New', monospace; margin: 10px 0;">
+                "${fraseActual}"
+            </p>
+            <p style="color:#aaa; font-size:1rem; margin-top: 10px;">
+                Película: <strong>${document.getElementById('movie-title').textContent}</strong>
+            </p>
+        </div>
+        <p style="color:#aaa; font-size:1.2rem; margin-bottom:30px;">Has perdido esta partida</p>
+        <button onclick="volverAlInicio()" style="padding:15px 40px; background:#dc3545; color:#fff; border:2px solid #fff; font-weight:bold; cursor:pointer; font-size:1.3rem; border-radius:8px; font-family:'Courier New', monospace; text-transform:uppercase; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);">
+            🏠 VOLVER A JUGAR
+        </button>
+    `;
+    el.style.display = 'flex';
+    
+    bloquearJuego();
+}
 
         // Auxiliar para bloquear UI
         function bloquearJuego() {

@@ -31,18 +31,17 @@ body {
    ========================================= */
 .layout-container {
     display: grid;
-    grid-template-columns: 280px 1fr 280px; 
-    /* La fila central es 'auto' para crecer con el contenido */
-    grid-template-rows: 80px auto; 
+    grid-template-columns: 200px 1fr 200px; 
+    grid-template-rows: 70px 1fr; 
     grid-template-areas: 
         "header   header header"
         "alphabet center right";
-    gap: 20px;
-    padding: 20px;
-    width: 100%;
-    max-width: 1600px;
-    /* Altura mínima de pantalla completa */
-    min-height: 100vh; 
+    gap: 10px;
+    padding: 10px;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 /* =========================================
@@ -57,7 +56,7 @@ body {
     border-bottom: 2px solid #8b0000;
     box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
     border-radius: 0 0 15px 15px;
-    height: 80px; /* Altura fija para el header */
+    height: 70px;
 }
 
 .titulo-panel {
@@ -78,21 +77,18 @@ body {
     background: rgba(10, 10, 10, 0.95);
     border: 3px solid #8b0000;
     border-radius: 12px;
-    padding: 15px;
+    padding: 10px;
     box-shadow: inset 0 0 30px rgba(139, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* Hacemos que el panel se quede fijo al scrollear si la página crece */
-    position: sticky; 
-    top: 20px;
-    height: calc(100vh - 40px); 
+    height: 100%;
 }
 
 #alphabet-sidebar {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 8px;
     overflow-y: auto;
     padding: 5px;
     height: 100%;
@@ -158,50 +154,44 @@ body {
     grid-area: center;
     display: flex;
     flex-direction: column;
-    /* Separación flexible */
     justify-content: space-between; 
-    gap: 20px;
+    gap: 10px;
     height: 100%;
-    /* Quitamos overflow hidden para permitir que crezca */
-    flex:1;
+    overflow: hidden;
 }
-
 .board-section {
     background: rgba(20, 20, 20, 0.8);
     border: 4px solid #8b0000;
     border-radius: 15px;
-    padding: 30px; /* Más padding para que respire */
+    padding: 15px;
     box-shadow: 0 0 25px rgba(139, 0, 0, 0.3);
-    
-    /* CAMBIO CLAVE: Altura automática basada en contenido */
-    height: auto; 
-    min-height: 200px; /* Mínimo para que no se vea ridículo si está vacío */
-    
+    height: 50%;
     display: flex;
-    flex-direction: column; /* Asegura flujo vertical */
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content:center;
+    overflow: hidden;
 }
 
 #frase-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 32px;
+    gap: 20px;
     width: 100%;
 }
 
 .palabra {
     display: flex;
-    gap: 6px;
-    margin-bottom: 15px; /* Separación entre líneas de palabras */
+    gap: 4px;
+    margin-bottom: 10px; /* Separación entre líneas de palabras */
     flex-wrap: wrap; /* Si la palabra es muy larga, que baje */
     justify-content: center;
 }
 
 .letra {
-    width: 50px;
-    height: 60px;
+    width: 40px;
+    height: 50px;
     background: rgba(255, 255, 255, 0.05); 
     border: 2px solid #500; 
     border-radius: 6px;
@@ -232,26 +222,37 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 10px;
-    /* Aseguramos que la ruleta no se aplaste si el panel crece */
-    flex-shrink: 0; 
-    margin-top: auto; /*La empuja hacia abajo*/
-    flex:2;
+    flex-shrink: 0;
+    height: 50%;
 }
 
 /* Avatar */
 .player-block { width: 30%; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-.avatar-circle { width: 130px; height: 130px; border-radius: 50%; border: 4px solid #ff0000; box-shadow: 0 0 20px #ff0000; overflow: hidden; background: #000; }
+.avatar-circle { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #ff0000; box-shadow: 0 0 20px #ff0000; overflow: hidden; background: #000; }
 .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
 .stat-box { background: #111; border: 2px solid #8b0000; color: #fff; padding: 10px; width: 100%; text-align: center; font-weight: bold; box-shadow: 4px 4px 0 #8b0000; }
 .stat-value { font-size: 1.4rem; color: #ffd700; display: block; }
 
 /* Ruleta */
-.wheel-wrapper { width: 65%; display: flex; flex-direction: column; align-items: center; position: relative; }
-.marco-ruleta { width: 340px; height: 340px; position: relative; margin-bottom: 20px; }
+.wheel-wrapper { 
+    width: 65%; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    position: relative;
+    justify-content: center;
+    height: 100%;
+}
+.marco-ruleta { 
+    width: 240px; 
+    height: 240px; 
+    position: relative; 
+    margin-bottom: 10px; 
+}
 #ruleta { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); pointer-events: none; }
 #ruleta img { width: 100%; height: 100%; transform: scale(1.02); }
 #flecha { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); font-size: 45px; color: #ffd700; z-index: 10; text-shadow: 0 0 10px #ff0000; }
-#btnGirar { background: linear-gradient(180deg, #b30000, #800000); color: white; border: 2px solid #ff3333; padding: 12px 30px; font-size: 1.3rem; font-weight: bold; cursor: pointer; border-radius: 5px; box-shadow: 0 0 15px #ff0000; font-family: inherit; transition: 0.2s; }
+#btnGirar { background: linear-gradient(180deg, #b30000, #800000); color: white; border: 2px solid #ff3333; padding: 12px 30px; font-size: 1.3rem; font-weight: bold; cursor: pointer; border-radius: 5px; box-shadow: 0 0 15px #ff0000; font-family: inherit; transition: 0.2s;margin-top:10px;}
 #btnGirar:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.2); }
 #btnGirar:disabled { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
 
@@ -262,19 +263,27 @@ body {
     grid-area: right;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    /* Sticky para que los controles te sigan si la página crece */
-    position: sticky;
-    top: 20px;
-    height: calc(100vh - 40px);
+    gap: 10px;
+    height: 100%;
 }
-.timer-box { background: #000; border: 4px solid #8b0000; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 0 20px rgba(139, 0, 0, 0.5); height: 160px; display: flex; flex-direction: column; justify-content: center; }
+.timer-box { 
+    background: #000; 
+    border: 4px solid #8b0000; 
+    border-radius: 12px; 
+    padding: 15px; 
+    text-align: center; 
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.5); 
+    height: 140px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+}
 .timer-label { color: #aaa; font-size: 0.9rem; margin-bottom: 5px; }
 #temporizador { font-size: 3.5rem; color: #00ff00; text-shadow: 0 0 10px #00ff00; }
 #temporizador.danger { color: #ff0000; text-shadow: 0 0 15px #ff0000; animation: blink 0.5s infinite; }
 
 .controls-box { flex-grow: 1; background: rgba(255, 255, 255, 0.03); border: 2px dashed #444; border-radius: 12px; padding: 20px; display: flex; flex-direction: column;  gap: 15px; }
-.action-btn { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; font-family: inherit; text-transform: uppercase; }
+.action-btn { width: 100%; padding: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; font-family: inherit; text-transform: uppercase; }
 .btn-guess { background: #ffd700; color: #000; border: 2px solid #e6c200; }
 .btn-guess:hover { background: #fff; box-shadow: 0 0 20px #ffd700; }
 .btn-reset { background: #333; color: #fff; border: 1px solid #555; }
