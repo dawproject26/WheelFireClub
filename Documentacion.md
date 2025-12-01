@@ -2121,37 +2121,356 @@ La ruleta combina mecánicas tradicionales de juegos de palabras (como La Ruleta
 - Los personajes probablemente activan eventos especiales, penalizaciones o bonificaciones temáticas de la serie
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Documentación de Migración de Cache**
+# Documentación de Migraciones de Base de Datos
 
-_Ruta: database/migrations/0001_01_01_000001_create_cache_table.php_
+## Tabla de Contenidos
+- [Migración de Cache](#migración-de-cache)
+- [Migración de Users](#migración-de-users)
+- [Migración de Panels](#migración-de-panels)
+- [Migración de Phrases](#migración-de-phrases)
+- [Migración de Players](#migración-de-players)
+- [Migración de Roulette](#migración-de-roulette)
+- [Migración de Scores](#migración-de-scores)
+- [Migración de Timers](#migración-de-timers)
 
-**Descripción General**
+---
+
+## Migración de Cache
+
+**Ruta:** `database/migrations/0001_01_01_000001_create_cache_table.php`
+
+### Descripción General
 Migración anónima de Laravel que crea dos tablas para el sistema de caché y bloqueos de caché.
 
-Estructura de Tablas
-**Tabla**: cache
+### Estructura de Tablas
+
+#### Tabla: `cache`
 Almacena los elementos del sistema de caché.
 
-**Columnas**:
-- key: Clave identificadora del elemento de caché (string, clave primaria)
-- value: Valor almacenado en caché (mediumText)
-- expiration: Timestamp de expiración del elemento (integer)
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `key` | string | Clave identificadora del elemento de caché (clave primaria) |
+| `value` | mediumText | Valor almacenado en caché |
+| `expiration` | integer | Timestamp de expiración del elemento |
 
-**Tabla**: cache_locks
+#### Tabla: `cache_locks`
 Gestiona los bloqueos del sistema de caché.
 
-**Columnas**:
-- key: Clave identificadora del bloqueo (string, clave primaria)
-- owner: Propietario del bloqueo (string)
-- expiration: Timestamp de expiración del bloqueo (integer)
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `key` | string | Clave identificadora del bloqueo (clave primaria) |
+| `owner` | string | Propietario del bloqueo |
+| `expiration` | integer | Timestamp de expiración del bloqueo |
 
-**Métodos**
-**up()**
+### Métodos
+
+#### `up()`
 Ejecuta las migraciones creando las dos tablas en la base de datos.
-**down()**
+
+#### `down()`
 Revierte las migraciones eliminando las dos tablas de la base de datos en el siguiente orden:
-- cache
-- cache_locks
+1. `cache`
+2. `cache_locks`
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Users
+
+**Ruta:** `database/migrations/0001_01_01_000000_create_users_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea tres tablas principales para el sistema de autenticación y gestión de sesiones.
+
+### Estructura de Tablas
+
+#### Tabla: `users`
+Almacena la información de los usuarios del sistema.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `name` | string | Nombre del usuario |
+| `email` | string | Correo electrónico (único) |
+| `email_verified_at` | timestamp | Fecha de verificación del correo (nullable) |
+| `password` | string | Contraseña encriptada |
+| `remember_token` | string | Token para la funcionalidad "recordarme" |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+#### Tabla: `password_reset_tokens`
+Gestiona los tokens para el restablecimiento de contraseñas.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `email` | string | Correo electrónico (clave primaria) |
+| `token` | string | Token de restablecimiento |
+| `created_at` | timestamp | Fecha de creación del token (nullable) |
+
+#### Tabla: `sessions`
+Almacena las sesiones activas de los usuarios.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | string | Identificador de sesión (clave primaria) |
+| `user_id` | bigInteger | Identificador del usuario (foreign key, nullable, indexada) |
+| `ip_address` | string(45) | Dirección IP del usuario (nullable) |
+| `user_agent` | text | Información del navegador/cliente (nullable) |
+| `payload` | longText | Datos de la sesión |
+| `last_activity` | integer | Timestamp de última actividad (indexada) |
+
+### Métodos
+
+#### `up()`
+Ejecuta las migraciones creando las tres tablas en la base de datos.
+
+#### `down()`
+Revierte las migraciones eliminando las tres tablas de la base de datos en el siguiente orden:
+1. `users`
+2. `password_reset_tokens`
+3. `sessions`
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Panels
+
+**Ruta:** `database/migrations/2025_11_17_090740_create_panels_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea la tabla para el sistema de paneles.
+
+### Estructura de Tablas
+
+#### Tabla: `panels`
+Almacena los paneles del sistema.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `title` | string | Título del panel (nullable) |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+### Métodos
+
+#### `up()`
+Ejecuta la migración creando la tabla en la base de datos.
+
+#### `down()`
+Revierte la migración eliminando la tabla `panels` de la base de datos.
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Phrases
+
+**Ruta:** `database/migrations/2025_11_21_090334_create_phrases_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea la tabla para el sistema de frases de películas.
+
+### Estructura de Tablas
+
+#### Tabla: `phrases`
+Almacena frases de películas asociadas a paneles.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `movie` | string | Nombre de la película |
+| `phrase` | text | Frase de la película |
+| `panel_id` | bigInteger | Identificador del panel (foreign key, nullable) |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+### Restricciones
+- `panel_id` tiene una relación de clave foránea con la tabla `panels`
+- **Eliminación en cascada:** cuando se elimina un panel, se eliminan todas sus frases asociadas
+
+### Métodos
+
+#### `up()`
+Ejecuta la migración creando la tabla en la base de datos.
+
+#### `down()`
+Revierte la migración eliminando la tabla `phrases` de la base de datos.
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Players
+
+**Ruta:** `database/migrations/2025_11_17_090811_create_players_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea la tabla para el sistema de jugadores.
+
+### Estructura de Tablas
+
+#### Tabla: `players`
+Almacena la información de los jugadores.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `name` | string | Nombre del jugador (nullable) |
+| `idavatar` | integer | Identificador del avatar |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+### Métodos
+
+#### `up()`
+Ejecuta la migración creando la tabla en la base de datos.
+
+#### `down()`
+Revierte la migración eliminando la tabla `players` de la base de datos.
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Roulette
+
+**Ruta:** `database/migrations/2025_11_17_090715_create_roulettes_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea la tabla para el sistema de ruleta.
+
+### Estructura de Tablas
+
+#### Tabla: `roulette`
+Almacena las opciones disponibles en la ruleta.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `option` | string | Opción de la ruleta |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+### Métodos
+
+#### `up()`
+Ejecuta la migración creando la tabla en la base de datos.
+
+#### `down()`
+Revierte la migración eliminando la tabla `roulette` de la base de datos.
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Scores
+
+**Ruta:** `database/migrations/2025_11_17_090819_create_scores_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea la tabla para el sistema de puntuaciones.
+
+### Estructura de Tablas
+
+#### Tabla: `scores`
+Almacena las puntuaciones de los jugadores.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `player_id` | bigInteger | Identificador del jugador (foreign key) |
+| `score` | integer | Puntuación del jugador (valor por defecto: 0) |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+### Métodos
+
+#### `up()`
+Ejecuta la migración creando la tabla en la base de datos.
+
+#### `down()`
+Revierte la migración eliminando la tabla `scores` de la base de datos.
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Migración de Timers
+
+**Ruta:** `database/migrations/2025_11_17_090649_create_timers_table.php`
+
+### Descripción General
+Migración anónima de Laravel que crea la tabla para el sistema de temporizadores.
+
+### Estructura de Tablas
+
+#### Tabla: `timers`
+Almacena los temporizadores asociados a jugadores.
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | bigInteger | Identificador único autoincremental (clave primaria) |
+| `player_id` | bigInteger | Identificador del jugador (foreign key, nullable) |
+| `seconds` | integer | Duración en segundos del temporizador (valor por defecto: 120) |
+| `created_at` | timestamp | Fecha de creación del registro |
+| `updated_at` | timestamp | Fecha de última actualización del registro |
+
+### Métodos
+
+#### `up()`
+Ejecuta la migración creando la tabla en la base de datos.
+
+#### `down()`
+Revierte la migración eliminando la tabla `timers` de la base de datos.
+
+### Tecnología
+- **Framework:** Laravel
+- **Tipo:** Migration
+- **Namespace:** `Illuminate\Database\Migrations`
+
+---
+
+## Diagrama de Relaciones
+```
+users
+  └── sessions (user_id)
+
+panels
+  └── phrases (panel_id) [CASCADE DELETE]
+
+players
+  ├── scores (player_id)
+  └── timers (player_id)
+
+roulette (tabla independiente)
+
+cache (tabla independiente)
+cache_locks (tabla independiente)
+```
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
